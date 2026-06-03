@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDataGrid } from "@refinedev/mui";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
+import { useNavigate } from "react-router";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -293,6 +294,7 @@ const EmptyOverlay: React.FC<EmptyStateProps> = ({
 // ---------------------------------------------------------------------------
 
 export const CarrierList: React.FC = () => {
+  const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [stateFilter, setStateFilter] = useState("");
@@ -558,6 +560,7 @@ export const CarrierList: React.FC = () => {
           disableColumnMenu
           pageSizeOptions={[10, 20, 50, 100]}
           density="compact"
+          onRowClick={({ row }) => navigate(`/carriers/show/${row.id}`)}
           slots={{
             noRowsOverlay: () => (
               <EmptyOverlay
@@ -583,6 +586,9 @@ export const CarrierList: React.FC = () => {
             "& .MuiDataGrid-cell": {
               display: "flex",
               alignItems: "center",
+            },
+            "& .MuiDataGrid-row": {
+              cursor: "pointer",
             },
           }}
         />

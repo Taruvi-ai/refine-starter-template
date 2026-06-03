@@ -32,6 +32,7 @@ import { useContext, useRef, useEffect } from "react";
 import { Login } from "./pages/login";
 import { Dashboard } from "./pages/home/Dashboard";
 import { CarrierList } from "./pages/carriers";
+import { CarrierShow } from "./pages/carriers/show";
 import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 
@@ -89,6 +90,7 @@ const AppContent = () => {
                   {
                     name: "carriers",
                     list: "/carriers",
+                    show: "/carriers/show/:id",
                     meta: {
                       label: "Carriers",
                       icon: <LocalShippingRoundedIcon />,
@@ -137,6 +139,7 @@ const AppContent = () => {
                   >
                     <Route index element={<Dashboard />} />
                     <Route path="/carriers" element={<CarrierList />} />
+                    <Route path="/carriers/show/:id" element={<CarrierShow />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                 </Routes>
