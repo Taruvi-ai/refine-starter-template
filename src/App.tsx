@@ -14,6 +14,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import routerProvider, { DocumentTitleHandler } from "@refinedev/react-router";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
+// Note: Navigate is still used for the /login redirect
 import { taruviClient } from "./taruviClient";
 import {
   taruviDataProvider,
@@ -28,10 +29,11 @@ import { LoginRedirect } from "./components/auth/LoginRedirect";
 import { ColorModeContextProvider, ColorModeContext } from "./contexts/color-mode";
 import {AppSettingsProvider, useAppSettings} from "./contexts/app-settings";
 import { useContext, useRef, useEffect } from "react";
-import { Home } from "./pages/home";
 import { Login } from "./pages/login";
+import { Dashboard } from "./pages/home/Dashboard";
 import { CarrierList } from "./pages/carriers";
 import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
+import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 
 const AppContent = () => {
   const { setMode } = useContext(ColorModeContext);
@@ -76,6 +78,14 @@ const AppContent = () => {
                 authProvider={taruviAuthProvider}
                 // accessControlProvider={taruviAccessControlProvider} // Uncomment to enable Cerbos-based access control
                 resources={[
+                  {
+                    name: "dashboard",
+                    list: "/",
+                    meta: {
+                      label: "Dashboard",
+                      icon: <DashboardRoundedIcon />,
+                    },
+                  },
                   {
                     name: "carriers",
                     list: "/carriers",
@@ -125,7 +135,7 @@ const AppContent = () => {
                       </Authenticated>
                     }
                   >
-                    <Route index element={<Navigate to="/carriers" replace />} />
+                    <Route index element={<Dashboard />} />
                     <Route path="/carriers" element={<CarrierList />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
