@@ -33,3 +33,8 @@ _.sln
 # Auth secrets
 auth.json
 .codex/auth.json
+
+# Python tooling
+tools/safer_poc/.venv/
+tools/safer_poc/**/__pycache__/
+tools/safer_poc/**/*.pyc

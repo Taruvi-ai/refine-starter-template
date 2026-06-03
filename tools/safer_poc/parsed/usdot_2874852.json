@@ -1,0 +1,21 @@
+{
+  "usdot_number": "2874852",
+  "legal_name": "ALL PURPOSE HANDY HELPERS",
+  "entity_type": "CARRIER",
+  "usdot_status": "ACTIVE",
+  "operating_authority_status": "NOT AUTHORIZED",
+  "physical_address": "13841 PURPLEMARTIN ST HOUSTON, TX 77083-6867",
+  "mailing_address": "13841 PURPLEMARTIN ST HOUSTON, TX 77083-6867",
+  "phone": "(713) 377-2124",
+  "power_units": 399997,
+  "drivers": 12,
+  "operation_classification": [
+    "Private(Property)"
+  ],
+  "carrier_operation": [
+    "Intrastate Only (Non-HM)"
+  ],
+  "cargo_carried": [
+    "General Freight"
+  ]
+}
