@@ -30,6 +30,8 @@ import {AppSettingsProvider, useAppSettings} from "./contexts/app-settings";
 import { useContext, useRef, useEffect } from "react";
 import { Home } from "./pages/home";
 import { Login } from "./pages/login";
+import { CarrierList } from "./pages/carriers";
+import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
 
 const AppContent = () => {
   const { setMode } = useContext(ColorModeContext);
@@ -74,7 +76,14 @@ const AppContent = () => {
                 authProvider={taruviAuthProvider}
                 // accessControlProvider={taruviAccessControlProvider} // Uncomment to enable Cerbos-based access control
                 resources={[
-                  // Add your resources here
+                  {
+                    name: "carriers",
+                    list: "/carriers",
+                    meta: {
+                      label: "Carriers",
+                      icon: <LocalShippingRoundedIcon />,
+                    },
+                  },
                 ]}
                 options={{
                   syncWithLocation: true,
@@ -116,7 +125,8 @@ const AppContent = () => {
                       </Authenticated>
                     }
                   >
-                    <Route index element={<Home />} />
+                    <Route index element={<Navigate to="/carriers" replace />} />
+                    <Route path="/carriers" element={<CarrierList />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                 </Routes>
