@@ -13,7 +13,7 @@ _HERE = Path(__file__).parent
 if str(_HERE) not in sys.path:
     sys.path.insert(0, str(_HERE))
 
-from models import CarrierSnapshot
+from models import CarrierSnapshot, PAGE_CARRIER, PAGE_INACTIVE, PAGE_NOT_FOUND
 
 
 # ---------------------------------------------------------------------------
@@ -51,16 +51,6 @@ def _norm_int(raw: Optional[str]) -> Optional[int]:
         return None
 
 
-def _field(html: str, label_re: str) -> Optional[str]:
-    """
-    Extract the queryfield TD that immediately follows a querylabel TH whose
-    anchor text matches *label_re*.
-    """
-    pat = label_re + r"</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>"
-    m = re.search(pat, html, re.IGNORECASE | re.DOTALL)
-    return m.group(1) if m else None
-
-
 def _checked_items(html: str, section_start_re: str, section_end_re: str) -> List[str]:
     """
     Extract labels from checkbox-style tables where the first TD contains 'X'.
@@ -83,6 +73,20 @@ def _checked_items(html: str, section_start_re: str, section_end_re: str) -> Lis
     return items
 
 
+def _extract_error_dot(html: str) -> Optional[str]:
+    """
+    Pull the DOT number from SAFER error pages.
+    Both NOT_FOUND and INACTIVE embed: USDOT Number = <number>
+    """
+    m = re.search(
+        r"USDOT\s+Number\s*=\s*(\d+)",
+        html, re.IGNORECASE | re.DOTALL,
+    )
+    if m:
+        return m.group(1).strip()
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -90,28 +94,48 @@ def _checked_items(html: str, section_start_re: str, section_end_re: str) -> Lis
 def parse_safer_html(html: str) -> CarrierSnapshot:
     """Parse a SAFER company-snapshot HTML string and return a CarrierSnapshot."""
 
-    # USDOT Number
+    # --- Detect error pages first and return early ---
+
+    if re.search(r"SAFER Web - Company Snapshot RECORD NOT FOUND", html, re.IGNORECASE):
+        return CarrierSnapshot(
+            page_type=PAGE_NOT_FOUND,
+            usdot_number=_extract_error_dot(html),
+            legal_name=None, entity_type=None, usdot_status=None,
+            operating_authority_status=None, physical_address=None,
+            mailing_address=None, phone=None,
+            power_units=None, drivers=None,
+        )
+
+    if re.search(r"SAFER Web - Company Snapshot RECORD INACTIVE", html, re.IGNORECASE):
+        return CarrierSnapshot(
+            page_type=PAGE_INACTIVE,
+            usdot_number=_extract_error_dot(html),
+            legal_name=None, entity_type=None, usdot_status=None,
+            operating_authority_status=None, physical_address=None,
+            mailing_address=None, phone=None,
+            power_units=None, drivers=None,
+        )
+
+    # --- Normal carrier snapshot page ---
+
     m = re.search(
         r"USDOT\s*Number:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
     )
     usdot_number = _norm_str(m.group(1) if m else None)
 
-    # Legal Name
     m = re.search(
         r"Legal\s*Name:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
     )
     legal_name = _norm_str(m.group(1) if m else None)
 
-    # Entity Type
     m = re.search(
         r"Entity\s*Type:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
     )
     entity_type = _norm_str(m.group(1) if m else None)
 
-    # USDOT Status
     m = re.search(
         r"USDOT\s*Status:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
@@ -132,28 +156,24 @@ def parse_safer_html(html: str) -> CarrierSnapshot:
         )
         operating_authority_status = status_m.group(0).strip() if status_m else (_norm_str(val) if val else None)
 
-    # Physical Address
     m = re.search(
         r"Physical\s*Address:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
     )
     physical_address = _norm_str(m.group(1) if m else None)
 
-    # Mailing Address
     m = re.search(
         r"Mailing\s*Address:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
     )
     mailing_address = _norm_str(m.group(1) if m else None)
 
-    # Phone
     m = re.search(
         r"Phone:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
     )
     phone = _norm_str(m.group(1) if m else None)
 
-    # Power Units (numeric)
     m = re.search(
         r"Power\s*Units:</A>\s*</TH>\s*<TD[^>]*class=\"queryfield\"[^>]*>(.*?)</TD>",
         html, re.IGNORECASE | re.DOTALL,
@@ -167,21 +187,18 @@ def parse_safer_html(html: str) -> CarrierSnapshot:
     )
     drivers = _norm_int(m.group(1) if m else None)
 
-    # Operation Classification (checkboxes)
     operation_classification = _checked_items(
         html,
         r"Operation\s*Classification:</A>",
         r"<!--\s*BEGIN:\s*Carrier\s*Operation",
     )
 
-    # Carrier Operation (checkboxes)
     carrier_operation = _checked_items(
         html,
         r"Carrier\s*Operation:</A>",
         r"<!--\s*BEGIN:\s*(?:Shipper|Cargo)",
     )
 
-    # Cargo Carried (checkboxes)
     cargo_carried = _checked_items(
         html,
         r"Cargo\s*Carried:</A>",
@@ -189,6 +206,7 @@ def parse_safer_html(html: str) -> CarrierSnapshot:
     )
 
     return CarrierSnapshot(
+        page_type=PAGE_CARRIER,
         usdot_number=usdot_number,
         legal_name=legal_name,
         entity_type=entity_type,

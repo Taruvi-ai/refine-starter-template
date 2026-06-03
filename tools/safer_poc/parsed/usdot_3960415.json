@@ -1,0 +1,22 @@
+{
+  "page_type": "CARRIER",
+  "usdot_number": "3960415",
+  "legal_name": "CITIZENS TELECOM SERVICES COMPANY LLC",
+  "entity_type": "CARRIER",
+  "usdot_status": "ACTIVE",
+  "operating_authority_status": "NOT AUTHORIZED",
+  "physical_address": "1919 MCKINNEY AVE DALLAS, TX 75201",
+  "mailing_address": "3508 N BELT LINE RD IRVING, TX 75062",
+  "phone": "(214) 789-2417",
+  "power_units": 2937,
+  "drivers": 2405,
+  "operation_classification": [
+    "Private(Property)"
+  ],
+  "carrier_operation": [
+    "Interstate"
+  ],
+  "cargo_carried": [
+    "Utilities"
+  ]
+}

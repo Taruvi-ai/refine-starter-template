@@ -1,0 +1,25 @@
+{
+  "page_type": "CARRIER",
+  "usdot_number": "154740",
+  "legal_name": "WESTERN OILFIELDS SUPPLY CO",
+  "entity_type": "CARRIER",
+  "usdot_status": "ACTIVE",
+  "operating_authority_status": "AUTHORIZED FOR Property",
+  "physical_address": "3404 STATE RD BAKERSFIELD, CA 93308-4538",
+  "mailing_address": "PO BOX 2248 BAKERSFIELD, CA 93303-2248",
+  "phone": "(661) 387-6142",
+  "power_units": 1139,
+  "drivers": 1146,
+  "operation_classification": [
+    "Auth. For Hire",
+    "Private(Property)"
+  ],
+  "carrier_operation": [
+    "Interstate"
+  ],
+  "cargo_carried": [
+    "Machinery, Large Objects",
+    "Oilfield Equipment",
+    "Water Well"
+  ]
+}
