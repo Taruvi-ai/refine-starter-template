@@ -34,7 +34,6 @@ import { Dashboard } from "./pages/home/Dashboard";
 import { CarrierList } from "./pages/carriers";
 import { CarrierShow } from "./pages/carriers/show";
 import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 
 const AppContent = () => {
   const { setMode } = useContext(ColorModeContext);
@@ -79,14 +78,6 @@ const AppContent = () => {
                 authProvider={taruviAuthProvider}
                 // accessControlProvider={taruviAccessControlProvider} // Uncomment to enable Cerbos-based access control
                 resources={[
-                  {
-                    name: "dashboard",
-                    list: "/",
-                    meta: {
-                      label: "Dashboard",
-                      icon: <DashboardRoundedIcon />,
-                    },
-                  },
                   {
                     name: "carriers",
                     list: "/carriers",

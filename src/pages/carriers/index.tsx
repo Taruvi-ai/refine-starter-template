@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDataGrid } from "@refinedev/mui";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -295,11 +295,27 @@ const EmptyOverlay: React.FC<EmptyStateProps> = ({
 
 export const CarrierList: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Initialise filter state from URL params (read-once on mount).
   const [searchInput, setSearchInput] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [stateFilter, setStateFilter] = useState("");
-  const [minDrivers, setMinDrivers] = useState<number | "">(20);
-  const [emailOnly, setEmailOnly] = useState(false);
+  const [stateFilter, setStateFilter] = useState(
+    () => searchParams.get("state") ?? ""
+  );
+  const [minDrivers, setMinDrivers] = useState<number | "">(
+    () => {
+      const v = searchParams.get("min_drivers");
+      return v !== null ? Math.max(0, Number(v)) : 20;
+    }
+  );
+  const [emailOnly, setEmailOnly] = useState(
+    () => searchParams.get("has_email") === "true"
+  );
+  // safer_enriched=false → show only not-yet-enriched carriers (server-side eq:false)
+  const [saferUnenriched, setSaferUnenriched] = useState(
+    () => searchParams.get("safer_enriched") === "false"
+  );
 
   // Debounce search input 300ms
   useEffect(() => {
@@ -313,8 +329,11 @@ export const CarrierList: React.FC = () => {
       initial: [
         { field: "census_status", operator: "eq", value: "A" },
         { field: "drivers", operator: "gte", value: 20 },
+        ...(emailOnly ? [{ field: "email", operator: "nnull", value: null } as const] : []),
+        ...(saferUnenriched ? [{ field: "safer_enriched", operator: "eq", value: false } as const] : []),
       ],
     },
+    // sort=drivers_desc is the default; honour it explicitly when param is set
     sorters: { initial: [{ field: "drivers", order: "desc" }] },
     pagination: { pageSize: 20 },
   });
@@ -323,7 +342,7 @@ export const CarrierList: React.FC = () => {
   const mountRef = useRef(false);
   useEffect(() => {
     if (!mountRef.current) {
-      // Skip the first synchronous render; the initial filters above handle it.
+      // Skip the first synchronous render; initial filters above handle it.
       mountRef.current = true;
       return;
     }
@@ -331,31 +350,25 @@ export const CarrierList: React.FC = () => {
       { field: "census_status", operator: "eq", value: "A" },
     ];
     if (minDrivers !== "" && Number(minDrivers) > 0) {
-      next.push({
-        field: "drivers",
-        operator: "gte",
-        value: Number(minDrivers),
-      });
+      next.push({ field: "drivers", operator: "gte", value: Number(minDrivers) });
     }
     if (stateFilter.trim()) {
-      next.push({
-        field: "phy_state",
-        operator: "eq",
-        value: stateFilter.trim().toUpperCase(),
-      });
+      next.push({ field: "phy_state", operator: "eq", value: stateFilter.trim().toUpperCase() });
     }
     if (emailOnly) {
       next.push({ field: "email", operator: "nnull", value: null });
     }
+    // safer_enriched=false: server-side eq:false filter.
+    // Note: matches rows where safer_enriched IS false; rows with NULL are excluded
+    // by this filter. All current seeded rows use explicit false, so this is safe.
+    if (saferUnenriched) {
+      next.push({ field: "safer_enriched", operator: "eq", value: false });
+    }
     if (debouncedSearch.trim()) {
-      next.push({
-        field: "search",
-        operator: "eq",
-        value: debouncedSearch.trim(),
-      });
+      next.push({ field: "search", operator: "eq", value: debouncedSearch.trim() });
     }
     setFilters(next, "replace");
-  }, [debouncedSearch, stateFilter, minDrivers, emailOnly, setFilters]);
+  }, [debouncedSearch, stateFilter, minDrivers, emailOnly, saferUnenriched, setFilters]);
 
   // Active filter chips (user-set non-default ones)
   const activeChips = useMemo(() => {
@@ -378,13 +391,20 @@ export const CarrierList: React.FC = () => {
         label: `Drivers ≥ ${minDrivers}`,
         onDelete: () => setMinDrivers(20),
       });
+    if (saferUnenriched)
+      chips.push({
+        key: "safer",
+        label: "SAFER: not enriched",
+        onDelete: () => setSaferUnenriched(false),
+      });
     return chips;
-  }, [stateFilter, emailOnly, minDrivers]);
+  }, [stateFilter, emailOnly, minDrivers, saferUnenriched]);
 
   const clearAllFilters = () => {
     setStateFilter("");
     setEmailOnly(false);
     setMinDrivers(20);
+    setSaferUnenriched(false);
   };
 
   const clearSearch = () => {

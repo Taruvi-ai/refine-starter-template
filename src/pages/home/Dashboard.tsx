@@ -305,7 +305,7 @@ export const Dashboard: React.FC = () => {
               variant="outlined"
               size="small"
               startIcon={<PeopleAltRoundedIcon />}
-              onClick={() => navigate("/carriers")}
+              onClick={() => navigate("/carriers?census_status=A&min_drivers=20")}
             >
               Active 20+ Drivers
             </Button>
@@ -313,7 +313,7 @@ export const Dashboard: React.FC = () => {
               variant="outlined"
               size="small"
               startIcon={<EmailRoundedIcon />}
-              onClick={() => navigate("/carriers")}
+              onClick={() => navigate("/carriers?has_email=true")}
             >
               Carriers with Email
             </Button>
@@ -321,7 +321,7 @@ export const Dashboard: React.FC = () => {
               variant="outlined"
               size="small"
               startIcon={<VerifiedRoundedIcon />}
-              onClick={() => navigate("/carriers")}
+              onClick={() => navigate("/carriers?safer_enriched=false")}
             >
               Not SAFER Enriched
             </Button>
@@ -329,7 +329,7 @@ export const Dashboard: React.FC = () => {
               variant="outlined"
               size="small"
               startIcon={<LocalShippingRoundedIcon />}
-              onClick={() => navigate("/carriers")}
+              onClick={() => navigate("/carriers?sort=drivers_desc")}
             >
               Largest Fleets
             </Button>
