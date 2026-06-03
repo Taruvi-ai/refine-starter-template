@@ -38,3 +38,6 @@ auth.json
 tools/safer_poc/.venv/
 tools/safer_poc/**/__pycache__/
 tools/safer_poc/**/*.pyc
+
+# Local Kiro/MCP config
+.kiro/settings/mcp.json
