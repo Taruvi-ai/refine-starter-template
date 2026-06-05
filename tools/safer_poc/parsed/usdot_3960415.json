@@ -1,0 +1,44 @@
+{
+  "page_type": "CARRIER",
+  "usdot_number": "3960415",
+  "legal_name": "CITIZENS TELECOM SERVICES COMPANY LLC",
+  "dba_name": "FRONTIER",
+  "entity_type": "CARRIER",
+  "usdot_status": "ACTIVE",
+  "mc_mx_ff_numbers": null,
+  "state_carrier_id": null,
+  "duns_number": null,
+  "out_of_service_date": null,
+  "operating_authority_status": "NOT AUTHORIZED",
+  "physical_address": "1919 MCKINNEY AVE DALLAS, TX 75201",
+  "mailing_address": "3508 N BELT LINE RD IRVING, TX 75062",
+  "phone": "(214) 789-2417",
+  "power_units": 2937,
+  "drivers": 2405,
+  "mcs_150_form_date": "12/30/2025",
+  "mcs_150_mileage": 23840546,
+  "mcs_150_mileage_year": 2025,
+  "us_inspections_total": 86,
+  "us_crashes_fatal": 0,
+  "us_crashes_injury": 3,
+  "us_crashes_tow": 3,
+  "us_crashes_total": 6,
+  "canada_inspections_total": 0,
+  "canada_crashes_fatal": 0,
+  "canada_crashes_injury": 0,
+  "canada_crashes_tow": 0,
+  "canada_crashes_total": 0,
+  "safety_rating": null,
+  "safety_rating_date": null,
+  "safety_review_date": null,
+  "safety_review_type": null,
+  "operation_classification": [
+    "Private(Property)"
+  ],
+  "carrier_operation": [
+    "Interstate"
+  ],
+  "cargo_carried": [
+    "Utilities"
+  ]
+}

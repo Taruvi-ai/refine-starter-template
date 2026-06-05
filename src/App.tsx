@@ -14,6 +14,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import routerProvider, { DocumentTitleHandler } from "@refinedev/react-router";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
+// Note: Navigate is still used for the /login redirect
 import { taruviClient } from "./taruviClient";
 import {
   taruviDataProvider,
@@ -28,8 +29,13 @@ import { LoginRedirect } from "./components/auth/LoginRedirect";
 import { ColorModeContextProvider, ColorModeContext } from "./contexts/color-mode";
 import {AppSettingsProvider, useAppSettings} from "./contexts/app-settings";
 import { useContext, useRef, useEffect } from "react";
-import { Home } from "./pages/home";
 import { Login } from "./pages/login";
+import { Dashboard } from "./pages/home/Dashboard";
+import { CarrierList } from "./pages/carriers";
+import { CarrierShow } from "./pages/carriers/show";
+import { DataSync } from "./pages/data-sync";
+import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
+import SyncRoundedIcon from "@mui/icons-material/SyncRounded";
 
 const AppContent = () => {
   const { setMode } = useContext(ColorModeContext);
@@ -74,7 +80,23 @@ const AppContent = () => {
                 authProvider={taruviAuthProvider}
                 // accessControlProvider={taruviAccessControlProvider} // Uncomment to enable Cerbos-based access control
                 resources={[
-                  // Add your resources here
+                  {
+                    name: "carriers",
+                    list: "/carriers",
+                    show: "/carriers/show/:id",
+                    meta: {
+                      label: "Carriers",
+                      icon: <LocalShippingRoundedIcon />,
+                    },
+                  },
+                  {
+                    name: "data-sync",
+                    list: "/data-sync",
+                    meta: {
+                      label: "Data Sync",
+                      icon: <SyncRoundedIcon />,
+                    },
+                  },
                 ]}
                 options={{
                   syncWithLocation: true,
@@ -116,7 +138,10 @@ const AppContent = () => {
                       </Authenticated>
                     }
                   >
-                    <Route index element={<Home />} />
+                    <Route index element={<Dashboard />} />
+                    <Route path="/carriers" element={<CarrierList />} />
+                    <Route path="/carriers/show/:id" element={<CarrierShow />} />
+                    <Route path="/data-sync" element={<DataSync />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                 </Routes>
