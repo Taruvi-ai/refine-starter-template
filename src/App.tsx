@@ -33,7 +33,9 @@ import { Login } from "./pages/login";
 import { Dashboard } from "./pages/home/Dashboard";
 import { CarrierList } from "./pages/carriers";
 import { CarrierShow } from "./pages/carriers/show";
+import { DataSync } from "./pages/data-sync";
 import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
+import SyncRoundedIcon from "@mui/icons-material/SyncRounded";
 
 const AppContent = () => {
   const { setMode } = useContext(ColorModeContext);
@@ -87,6 +89,14 @@ const AppContent = () => {
                       icon: <LocalShippingRoundedIcon />,
                     },
                   },
+                  {
+                    name: "data-sync",
+                    list: "/data-sync",
+                    meta: {
+                      label: "Data Sync",
+                      icon: <SyncRoundedIcon />,
+                    },
+                  },
                 ]}
                 options={{
                   syncWithLocation: true,
@@ -131,6 +141,7 @@ const AppContent = () => {
                     <Route index element={<Dashboard />} />
                     <Route path="/carriers" element={<CarrierList />} />
                     <Route path="/carriers/show/:id" element={<CarrierShow />} />
+                    <Route path="/data-sync" element={<DataSync />} />
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
                 </Routes>
