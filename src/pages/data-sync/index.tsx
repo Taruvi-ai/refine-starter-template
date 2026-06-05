@@ -11,6 +11,7 @@ import Container from "@mui/material/Container";
 import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
@@ -82,7 +83,7 @@ const fmtNum = (v: number | null | undefined): string =>
   v != null ? v.toLocaleString() : "—";
 
 // ---------------------------------------------------------------------------
-// KPI card
+// Sub-components
 // ---------------------------------------------------------------------------
 
 interface KpiCardProps {
@@ -94,7 +95,9 @@ interface KpiCardProps {
   sub?: string;
 }
 
-const KpiCard: React.FC<KpiCardProps> = ({ label, value, icon, loading, color = "primary.main", sub }) => (
+const KpiCard: React.FC<KpiCardProps> = ({
+  label, value, icon, loading, color = "primary.main", sub,
+}) => (
   <Card sx={{ height: "100%" }}>
     <CardContent>
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
@@ -102,25 +105,31 @@ const KpiCard: React.FC<KpiCardProps> = ({ label, value, icon, loading, color = 
         {loading ? (
           <Skeleton variant="text" width={60} height={48} />
         ) : (
-          <Typography sx={{ fontFamily: "'Quicksand', sans-serif", fontWeight: 700, fontSize: { xs: 26, sm: 30 }, lineHeight: 1, color }}>
-            {value != null ? (typeof value === "number" ? value.toLocaleString() : value) : "—"}
+          <Typography sx={{
+            fontFamily: "'Quicksand', sans-serif",
+            fontWeight: 700,
+            fontSize: { xs: 26, sm: 30 },
+            lineHeight: 1,
+            color,
+          }}>
+            {value != null
+              ? (typeof value === "number" ? value.toLocaleString() : value)
+              : "—"}
           </Typography>
         )}
       </Stack>
       <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5, fontWeight: 500 }}>
         {label}
       </Typography>
-      {sub && <Typography variant="caption" color="text.disabled">{sub}</Typography>}
+      {sub && (
+        <Typography variant="caption" color="text.disabled">{sub}</Typography>
+      )}
     </CardContent>
   </Card>
 );
 
-// ---------------------------------------------------------------------------
-// Run status chip
-// ---------------------------------------------------------------------------
-
 const RunStatusChip: React.FC<{ status: string }> = ({ status }) => {
-  const map: Record<string, { color: "success" | "info" | "warning" | "error" | "default"; icon: React.ReactNode }> = {
+  const map: Record<string, { color: "success" | "warning" | "error" | "default"; icon: React.ReactNode }> = {
     completed: { color: "success", icon: <CheckCircleOutlineRoundedIcon style={{ fontSize: 13 }} /> },
     running:   { color: "warning", icon: <SyncRoundedIcon style={{ fontSize: 13 }} /> },
     failed:    { color: "error",   icon: <ErrorOutlineRoundedIcon style={{ fontSize: 13 }} /> },
@@ -137,12 +146,16 @@ const RunStatusChip: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Section label
-// ---------------------------------------------------------------------------
-
 const SectionLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Typography sx={{ fontFamily: "'Quicksand', sans-serif", fontWeight: 600, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", color: "text.disabled", mb: 1.5 }}>
+  <Typography sx={{
+    fontFamily: "'Quicksand', sans-serif",
+    fontWeight: 600,
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    color: "text.disabled",
+    mb: 1.5,
+  }}>
     {children}
   </Typography>
 );
@@ -232,7 +245,6 @@ export const DataSync: React.FC = () => {
   const latestCensusRun = latestCensusRunResult.data?.[0];
   const latestSaferRun = latestSaferRunResult.data?.[0];
   const runs = runsResult.data ?? [];
-
   const summaryLoading =
     totalCarriersQ.isLoading || enrichedQ.isLoading || pendingQ.isLoading ||
     censusSnapQ.isLoading || saferSnapQ.isLoading;
@@ -258,7 +270,12 @@ export const DataSync: React.FC = () => {
     try {
       const result = await executeFunction<FnResult>(
         CENSUS_SLUG,
-        { limit: censusLimit, offset: censusOffset, min_drivers: censusMinDrivers, max_pages: censusMaxPages },
+        {
+          limit: censusLimit,
+          offset: censusOffset,
+          min_drivers: censusMinDrivers,
+          max_pages: censusMaxPages,
+        },
         { kind: "function", async: true }
       );
       setCensusResult(result);
@@ -302,12 +319,18 @@ export const DataSync: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
-      {/* Header */}
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <Stack
+        direction="row"
+        alignItems="flex-start"
+        justifyContent="space-between"
+        sx={{ mb: 3 }}
+      >
         <Box>
-          <Typography variant="h2" sx={{ mb: 0.25 }}>Data Sync</Typography>
+          <Typography variant="h2" sx={{ mb: 0.5 }}>Data Sync</Typography>
           <Typography variant="body2" color="text.secondary">
-            Platform Census Sync · Platform SAFER Enrichment · Run history
+            Manage FMCSA Census syncs, SAFER enrichment, and ingestion history.
           </Typography>
         </Box>
         <Button
@@ -315,14 +338,15 @@ export const DataSync: React.FC = () => {
           size="small"
           startIcon={<RefreshRoundedIcon />}
           onClick={handleRefresh}
+          sx={{ mt: 0.5, flexShrink: 0 }}
         >
           Refresh
         </Button>
       </Stack>
 
-      {/* ── Summary cards ─────────────────────────────────────────────── */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+      {/* ── Primary KPIs ────────────────────────────────────────────────── */}
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid size={{ xs: 6, sm: 4 }}>
           <KpiCard
             label="Total Carriers"
             value={totalCarriersResult.total ?? null}
@@ -330,7 +354,7 @@ export const DataSync: React.FC = () => {
             loading={summaryLoading}
           />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid size={{ xs: 6, sm: 4 }}>
           <KpiCard
             label="SAFER Enriched"
             value={enrichedResult.total ?? null}
@@ -339,7 +363,7 @@ export const DataSync: React.FC = () => {
             color="success.main"
           />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <KpiCard
             label="Pending Enrichment"
             value={pendingResult.total ?? null}
@@ -348,7 +372,11 @@ export const DataSync: React.FC = () => {
             color="warning.main"
           />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+      </Grid>
+
+      {/* ── Secondary metrics + latest run status ───────────────────────── */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid size={{ xs: 6, sm: 3 }}>
           <KpiCard
             label="Census Snapshots"
             value={censusSnapResult.total ?? null}
@@ -357,7 +385,7 @@ export const DataSync: React.FC = () => {
             color="text.secondary"
           />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid size={{ xs: 6, sm: 3 }}>
           <KpiCard
             label="SAFER Snapshots"
             value={saferSnapResult.total ?? null}
@@ -366,47 +394,80 @@ export const DataSync: React.FC = () => {
             color="text.secondary"
           />
         </Grid>
-        <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
+        <Grid size={{ xs: 12, sm: 6 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
-              <SectionLabel>Latest Status</SectionLabel>
-              {latestCensusRun && (
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.75 }}>
-                  <Typography variant="caption" color="text.disabled" sx={{ minWidth: 50 }}>Census</Typography>
-                  <RunStatusChip status={latestCensusRun.status} />
+              <SectionLabel>Latest Run Status</SectionLabel>
+              {latestCensusRunQ.isLoading || latestSaferRunQ.isLoading ? (
+                <Stack spacing={1}>
+                  <Skeleton variant="text" height={28} />
+                  <Skeleton variant="text" height={28} />
                 </Stack>
-              )}
-              {latestSaferRun && (
-                <Stack direction="row" alignItems="center" spacing={1}>
-                  <Typography variant="caption" color="text.disabled" sx={{ minWidth: 50 }}>SAFER</Typography>
-                  <RunStatusChip status={latestSaferRun.status} />
+              ) : (
+                <Stack spacing={1.25}>
+                  {latestCensusRun ? (
+                    <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap">
+                      <RunStatusChip status={latestCensusRun.status} />
+                      <Typography variant="caption" color="text.disabled" sx={{ minWidth: 50 }}>
+                        Census
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {fmtDateTime(latestCensusRun.started_at)}
+                        {latestCensusRun.total_fetched != null
+                          ? ` · ${latestCensusRun.total_fetched.toLocaleString()} fetched`
+                          : ""}
+                        {(latestCensusRun.total_errors ?? 0) > 0
+                          ? ` · ${latestCensusRun.total_errors} errors`
+                          : ""}
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography variant="caption" color="text.disabled">No Census runs yet</Typography>
+                  )}
+                  <Divider />
+                  {latestSaferRun ? (
+                    <Stack direction="row" alignItems="center" spacing={1.5} flexWrap="wrap">
+                      <RunStatusChip status={latestSaferRun.status} />
+                      <Typography variant="caption" color="text.disabled" sx={{ minWidth: 50 }}>
+                        SAFER
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {fmtDateTime(latestSaferRun.started_at)}
+                        {latestSaferRun.total_fetched != null
+                          ? ` · ${latestSaferRun.total_fetched.toLocaleString()} fetched`
+                          : ""}
+                        {(latestSaferRun.total_errors ?? 0) > 0
+                          ? ` · ${latestSaferRun.total_errors} errors`
+                          : ""}
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Typography variant="caption" color="text.disabled">No SAFER runs yet</Typography>
+                  )}
                 </Stack>
-              )}
-              {!latestCensusRun && !latestSaferRun && !latestCensusRunQ.isLoading && (
-                <Typography variant="caption" color="text.disabled">No runs yet</Typography>
               )}
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* ── Action panels ─────────────────────────────────────────────── */}
+      {/* ── Action panels ───────────────────────────────────────────────── */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
 
-        {/* Census Sync panel */}
+        {/* Census Sync */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                 <SyncRoundedIcon sx={{ color: "primary.main", fontSize: 20 }} />
                 <Typography variant="h5">Sync Company Census</Typography>
               </Stack>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Fetches active carriers from the FMCSA Company Census API and upserts into <code>carriers</code>.
-                Runs from Platform runtime.
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
+                Adds active carriers from FMCSA Company Census where drivers meet the minimum
+                threshold. Runs from Platform runtime.
               </Typography>
 
-              <Grid container spacing={1.5} sx={{ mb: 2 }}>
+              <Grid container spacing={2} sx={{ mb: 2.5 }}>
                 <Grid size={{ xs: 6 }}>
                   <TextField
                     size="small"
@@ -417,6 +478,7 @@ export const DataSync: React.FC = () => {
                     onChange={(e) => setCensusLimit(Math.max(1, Number(e.target.value)))}
                     inputProps={{ min: 1, max: 10000 }}
                     InputLabelProps={{ shrink: true }}
+                    helperText="Rows per API page"
                   />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
@@ -429,6 +491,7 @@ export const DataSync: React.FC = () => {
                     onChange={(e) => setCensusOffset(Math.max(0, Number(e.target.value)))}
                     inputProps={{ min: 0 }}
                     InputLabelProps={{ shrink: true }}
+                    helperText="Starting offset in Census API"
                   />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
@@ -441,6 +504,7 @@ export const DataSync: React.FC = () => {
                     onChange={(e) => setCensusMaxPages(Math.max(1, Number(e.target.value)))}
                     inputProps={{ min: 1, max: 20 }}
                     InputLabelProps={{ shrink: true }}
+                    helperText="Pages to fetch per run"
                   />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
@@ -453,6 +517,7 @@ export const DataSync: React.FC = () => {
                     onChange={(e) => setCensusMinDrivers(Math.max(0, Number(e.target.value)))}
                     inputProps={{ min: 0 }}
                     InputLabelProps={{ shrink: true }}
+                    helperText="Minimum driver count filter"
                   />
                 </Grid>
               </Grid>
@@ -460,26 +525,36 @@ export const DataSync: React.FC = () => {
               <Button
                 variant="contained"
                 size="small"
-                startIcon={censusRunning ? <CircularProgress size={14} color="inherit" /> : <SyncRoundedIcon />}
+                startIcon={
+                  censusRunning
+                    ? <CircularProgress size={14} color="inherit" />
+                    : <SyncRoundedIcon />
+                }
                 onClick={handleCensusSync}
                 disabled={censusRunning}
-                sx={{ mb: censusResult || censusError ? 2 : 0 }}
               >
                 {censusRunning ? "Starting…" : "Run Census Sync"}
               </Button>
 
               {censusError && (
-                <Alert severity="error" onClose={() => setCensusError(null)} sx={{ mt: 1 }}>
+                <Alert severity="error" onClose={() => setCensusError(null)} sx={{ mt: 2 }}>
                   {censusError}
                 </Alert>
               )}
               {censusResult && (
-                <Alert severity="success" icon={<CheckCircleOutlineRoundedIcon fontSize="small" />} onClose={() => setCensusResult(null)} sx={{ mt: 1 }}>
+                <Alert
+                  severity="success"
+                  icon={<CheckCircleOutlineRoundedIcon fontSize="small" />}
+                  onClose={() => setCensusResult(null)}
+                  sx={{ mt: 2 }}
+                >
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>Job started</Typography>
                   {censusResult.invocation_id && (
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary" display="block">
                       Invocation ID: {censusResult.invocation_id}
-                      {censusResult.task_id ? ` · Task: ${String(censusResult.task_id).slice(0, 16)}…` : ""}
+                      {censusResult.task_id
+                        ? ` · Task: ${String(censusResult.task_id).slice(0, 16)}…`
+                        : ""}
                     </Typography>
                   )}
                   <Typography variant="caption" display="block" color="text.disabled">
@@ -491,35 +566,34 @@ export const DataSync: React.FC = () => {
           </Card>
         </Grid>
 
-        {/* SAFER Enrichment panel */}
+        {/* SAFER Enrichment */}
         <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ height: "100%" }}>
             <CardContent>
-              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
                 <SecurityRoundedIcon sx={{ color: "success.main", fontSize: 20 }} />
                 <Typography variant="h5">Run SAFER Enrichment</Typography>
               </Stack>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Fetches SAFER Company Snapshots for unenriched carriers and patches SAFER fields.
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
+                Fetches SAFER Company Snapshot details for selected unenriched carriers.
                 Runs from Platform runtime. Max 50 per run.
               </Typography>
 
-              <Grid container spacing={1.5} sx={{ mb: 2 }}>
+              <Grid container spacing={2} sx={{ mb: 2.5 }}>
                 <Grid size={{ xs: 6 }}>
-                  <Tooltip title="Maximum 50 per run" placement="top">
-                    <TextField
-                      size="small"
-                      label="Limit (max 50)"
-                      type="number"
-                      fullWidth
-                      value={saferLimit}
-                      onChange={(e) => setSaferLimit(Math.min(SAFER_MAX_LIMIT, Math.max(1, Number(e.target.value))))}
-                      inputProps={{ min: 1, max: SAFER_MAX_LIMIT }}
-                      InputLabelProps={{ shrink: true }}
-                      error={saferLimit > SAFER_MAX_LIMIT}
-                      helperText={saferLimit > SAFER_MAX_LIMIT ? `Capped at ${SAFER_MAX_LIMIT}` : undefined}
-                    />
-                  </Tooltip>
+                  <TextField
+                    size="small"
+                    label="Limit"
+                    type="number"
+                    fullWidth
+                    value={saferLimit}
+                    onChange={(e) =>
+                      setSaferLimit(Math.min(SAFER_MAX_LIMIT, Math.max(1, Number(e.target.value))))
+                    }
+                    inputProps={{ min: 1, max: SAFER_MAX_LIMIT }}
+                    InputLabelProps={{ shrink: true }}
+                    helperText="Maximum 50 per run"
+                  />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
                   <TextField
@@ -531,30 +605,35 @@ export const DataSync: React.FC = () => {
                     onChange={(e) => setSaferMinDrivers(Math.max(0, Number(e.target.value)))}
                     inputProps={{ min: 0 }}
                     InputLabelProps={{ shrink: true }}
+                    helperText="Minimum driver count filter"
                   />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
                   <TextField
                     size="small"
-                    label="State (optional)"
+                    label="State"
                     placeholder="e.g. TX"
                     fullWidth
                     value={saferState}
-                    onChange={(e) => setSaferState(e.target.value.slice(0, 2).toUpperCase())}
+                    onChange={(e) =>
+                      setSaferState(e.target.value.slice(0, 2).toUpperCase())
+                    }
                     inputProps={{ maxLength: 2, style: { textTransform: "uppercase" } }}
                     InputLabelProps={{ shrink: true }}
+                    helperText="Optional 2-letter state filter"
                   />
                 </Grid>
                 <Grid size={{ xs: 6 }}>
                   <TextField
                     size="small"
-                    label="Delay (seconds)"
+                    label="Delay (s)"
                     type="number"
                     fullWidth
                     value={saferDelay}
                     onChange={(e) => setSaferDelay(Math.max(0, Number(e.target.value)))}
                     inputProps={{ min: 0, step: 0.1 }}
                     InputLabelProps={{ shrink: true }}
+                    helperText="Seconds between SAFER requests"
                   />
                 </Grid>
                 <Grid size={12}>
@@ -566,7 +645,9 @@ export const DataSync: React.FC = () => {
                         onChange={(e) => setSaferOnlyUnenriched(e.target.checked)}
                       />
                     }
-                    label={<Typography variant="body2">Only unenriched carriers</Typography>}
+                    label={
+                      <Typography variant="body2">Only unenriched carriers</Typography>
+                    }
                     sx={{ ml: 0 }}
                   />
                 </Grid>
@@ -576,21 +657,29 @@ export const DataSync: React.FC = () => {
                 variant="contained"
                 color="success"
                 size="small"
-                startIcon={saferRunning ? <CircularProgress size={14} color="inherit" /> : <SecurityRoundedIcon />}
+                startIcon={
+                  saferRunning
+                    ? <CircularProgress size={14} color="inherit" />
+                    : <SecurityRoundedIcon />
+                }
                 onClick={handleSaferEnrich}
                 disabled={saferRunning}
-                sx={{ mb: saferResult || saferError ? 2 : 0 }}
               >
                 {saferRunning ? "Starting…" : "Run SAFER Enrichment"}
               </Button>
 
               {saferError && (
-                <Alert severity="error" onClose={() => setSaferError(null)} sx={{ mt: 1 }}>
+                <Alert severity="error" onClose={() => setSaferError(null)} sx={{ mt: 2 }}>
                   {saferError}
                 </Alert>
               )}
               {saferResult && (
-                <Alert severity="success" icon={<CheckCircleOutlineRoundedIcon fontSize="small" />} onClose={() => setSaferResult(null)} sx={{ mt: 1 }}>
+                <Alert
+                  severity="success"
+                  icon={<CheckCircleOutlineRoundedIcon fontSize="small" />}
+                  onClose={() => setSaferResult(null)}
+                  sx={{ mt: 2 }}
+                >
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>Job started</Typography>
                   {saferResult.invocation_id && (
                     <Typography variant="caption" color="text.secondary" display="block">
@@ -607,97 +696,127 @@ export const DataSync: React.FC = () => {
         </Grid>
       </Grid>
 
-      {/* ── Ingestion run history ──────────────────────────────────────── */}
+      {/* ── Ingestion Run History ────────────────────────────────────────── */}
       <Card>
         <CardContent>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-            <Typography variant="h5">Ingestion Run History</Typography>
-            <Typography variant="caption" color="text.disabled">
-              {runsResult.total != null ? `${runsResult.total} total runs` : ""}
-            </Typography>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ mb: 2.5 }}
+          >
+            <Box>
+              <Typography variant="h5">Ingestion Run History</Typography>
+              <Typography variant="caption" color="text.disabled">
+                {runsResult.total != null ? `${runsResult.total} total runs · latest 25 shown` : ""}
+              </Typography>
+            </Box>
           </Stack>
 
           {runsQ.isLoading ? (
             <Stack spacing={1}>
-              {[0, 1, 2].map((i) => <Skeleton key={i} variant="rounded" height={36} />)}
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} variant="rounded" height={36} />
+              ))}
             </Stack>
           ) : runs.length === 0 ? (
-            <Box sx={{ textAlign: "center", py: 4, color: "text.disabled" }}>
+            <Box sx={{ textAlign: "center", py: 5, color: "text.disabled" }}>
               <SyncRoundedIcon sx={{ fontSize: 40, mb: 1 }} />
               <Typography variant="body2">No ingestion runs yet.</Typography>
             </Box>
           ) : (
-            <TableContainer>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Started</TableCell>
-                    <TableCell>Completed</TableCell>
-                    <TableCell align="right">Fetched</TableCell>
-                    <TableCell align="right">Inserted</TableCell>
-                    <TableCell align="right">Updated</TableCell>
-                    <TableCell align="right">Skipped</TableCell>
-                    <TableCell align="right">Errors</TableCell>
-                    <TableCell>Error Detail</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {runs.map((run) => (
-                    <TableRow key={run.id} hover>
-                      <TableCell>
-                        <Chip
-                          size="small"
-                          label={run.run_type === "census_sync" ? "Census" : "SAFER"}
-                          variant="outlined"
-                          color={run.run_type === "census_sync" ? "primary" : "success"}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <RunStatusChip status={run.status} />
-                      </TableCell>
-                      <TableCell sx={{ fontSize: 12, whiteSpace: "nowrap" }}>
-                        {fmtDateTime(run.started_at)}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: 12, whiteSpace: "nowrap" }}>
-                        {fmtDateTime(run.completed_at)}
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontSize: 12 }}>{fmtNum(run.total_fetched)}</TableCell>
-                      <TableCell align="right" sx={{ fontSize: 12 }}>{fmtNum(run.total_inserted)}</TableCell>
-                      <TableCell align="right" sx={{ fontSize: 12 }}>{fmtNum(run.total_updated)}</TableCell>
-                      <TableCell align="right" sx={{ fontSize: 12 }}>{fmtNum(run.total_skipped)}</TableCell>
-                      <TableCell
-                        align="right"
-                        sx={{ fontSize: 12, color: (run.total_errors ?? 0) > 0 ? "error.main" : "text.primary" }}
-                      >
-                        {fmtNum(run.total_errors)}
-                      </TableCell>
-                      <TableCell sx={{ fontSize: 11, maxWidth: 200 }}>
-                        {run.error_details ? (
-                          <Tooltip title={run.error_details} placement="left">
-                            <Typography
-                              variant="caption"
-                              color="error.main"
-                              sx={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 180 }}
-                            >
-                              {run.error_details}
-                            </Typography>
-                          </Tooltip>
-                        ) : (
-                          <Typography variant="caption" color="text.disabled">—</Typography>
-                        )}
-                      </TableCell>
+            <Paper variant="outlined" sx={{ borderRadius: 1 }}>
+              <TableContainer sx={{ overflowX: "auto" }}>
+                <Table size="small" sx={{ minWidth: 800 }}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>Type</TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>Status</TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>Started</TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>Completed</TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>Fetched</TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>Inserted</TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>Updated</TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>Skipped</TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>Errors</TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap", minWidth: 160 }}>Error Detail</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                  </TableHead>
+                  <TableBody>
+                    {runs.map((run) => (
+                      <TableRow key={run.id} hover>
+                        <TableCell>
+                          <Chip
+                            size="small"
+                            label={run.run_type === "census_sync" ? "Census" : "SAFER"}
+                            variant="outlined"
+                            color={run.run_type === "census_sync" ? "primary" : "success"}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <RunStatusChip status={run.status} />
+                        </TableCell>
+                        <TableCell sx={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                          {fmtDateTime(run.started_at)}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: 12, whiteSpace: "nowrap" }}>
+                          {fmtDateTime(run.completed_at)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontSize: 12 }}>
+                          {fmtNum(run.total_fetched)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontSize: 12 }}>
+                          {fmtNum(run.total_inserted)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontSize: 12 }}>
+                          {fmtNum(run.total_updated)}
+                        </TableCell>
+                        <TableCell align="right" sx={{ fontSize: 12 }}>
+                          {fmtNum(run.total_skipped)}
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{
+                            fontSize: 12,
+                            fontWeight: (run.total_errors ?? 0) > 0 ? 600 : 400,
+                            color: (run.total_errors ?? 0) > 0 ? "error.main" : "text.primary",
+                          }}
+                        >
+                          {fmtNum(run.total_errors)}
+                        </TableCell>
+                        <TableCell sx={{ maxWidth: 200 }}>
+                          {run.error_details ? (
+                            <Tooltip title={run.error_details} placement="left">
+                              <Typography
+                                variant="caption"
+                                color="error.main"
+                                sx={{
+                                  display: "block",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: 180,
+                                  cursor: "help",
+                                }}
+                              >
+                                {run.error_details}
+                              </Typography>
+                            </Tooltip>
+                          ) : (
+                            <Typography variant="caption" color="text.disabled">—</Typography>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
           )}
         </CardContent>
       </Card>
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2.5 }} />
       <Typography variant="caption" color="text.disabled">
         Runs from Platform runtime · Data Sync is admin-facing · No sales data is modified here
       </Typography>
