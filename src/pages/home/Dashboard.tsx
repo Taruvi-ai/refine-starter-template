@@ -249,12 +249,12 @@ export const Dashboard: React.FC = () => {
             icon={<VerifiedRoundedIcon />}
             loading={isLoading}
             color={kpis.enriched > 0 ? "success.main" : "text.disabled"}
-            sub="Pending enrichment from RDC"
+            sub="Pending SAFER enrichment"
           />
         </Grid>
         <Grid size={{ xs: 6, sm: 4, lg: 2 }}>
           <KpiCard
-            label="States Covered"
+            label="States/Regions Covered"
             value={isLoading ? null : kpis.states}
             icon={<MapRoundedIcon />}
             loading={isLoading}
@@ -625,7 +625,7 @@ export const Dashboard: React.FC = () => {
                   color="text.disabled"
                   sx={{ display: "block", mt: 0.5 }}
                 >
-                  SAFER enrichment runs from RDC
+                  SAFER enrichment runs from Platform
                 </Typography>
               </Grid>
             </Grid>

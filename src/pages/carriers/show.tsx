@@ -519,7 +519,7 @@ export const CarrierShow: React.FC = () => {
               <Chip
                 size="small"
                 icon={<HourglassEmptyRoundedIcon style={{ fontSize: 14 }} />}
-                label="Pending enrichment from RDC"
+                label="Pending SAFER enrichment"
                 variant="outlined"
               />
             )}
@@ -528,7 +528,7 @@ export const CarrierShow: React.FC = () => {
           {!isSaferEnriched && (
             <Alert severity="info" sx={{ mb: 2 }}>
               This carrier has not been SAFER enriched yet. Fields below will
-              populate after an RDC fetch of this DOT's company snapshot.
+              populate after SAFER enrichment runs for this DOT.
             </Alert>
           )}
 
