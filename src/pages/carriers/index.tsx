@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useDataGrid } from "@refinedev/mui";
+import { useDataProvider } from "@refinedev/core";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { useNavigate, useSearchParams } from "react-router";
 import Alert from "@mui/material/Alert";
@@ -15,6 +16,7 @@ import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ErrorRoundedIcon from "@mui/icons-material/ErrorRounded";
 import FilterAltOffRoundedIcon from "@mui/icons-material/FilterAltOffRounded";
 import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
@@ -39,6 +41,12 @@ interface CarrierRow {
   drivers: number | null;
   power_units: number | null;
   safer_enriched: boolean | null;
+  // SAFER enrichment fields (populated for enriched carriers)
+  safety_rating: string | null;
+  operating_authority_status: string | null;
+  carrier_operation: string[] | null;
+  operation_classification: string[] | null;
+  cargo_carried: string[] | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -54,6 +62,85 @@ const fmtPhone = (v: string | null | undefined) => {
   if (d.length === 10)
     return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
   return v;
+};
+
+// ---------------------------------------------------------------------------
+// CSV export helpers
+// ---------------------------------------------------------------------------
+
+const SAFER_SNAPSHOT_URL = (dot: string) =>
+  `https://safer.fmcsa.dot.gov/query.asp?searchtype=ANY&query_type=queryCarrierSnapshot&query_param=USDOT&query_string=${dot}`;
+
+const CSV_HEADERS = [
+  "Legal Name",
+  "DBA Name",
+  "USDOT",
+  "City",
+  "State",
+  "Drivers",
+  "Power Units",
+  "Phone",
+  "Email",
+  "Census Status",
+  "SAFER Enriched",
+  "Safety Rating",
+  "Operating Authority",
+  "Carrier Operation",
+  "Operation Classification",
+  "Cargo Carried",
+  "SAFER Listing URL",
+];
+
+const escCsv = (v: unknown): string => {
+  if (v == null) return "";
+  const s = String(v);
+  if (s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+};
+
+const joinArr = (v: string[] | null | undefined): string =>
+  Array.isArray(v) ? v.join("; ") : "";
+
+const rowToCsvLine = (c: CarrierRow): string => {
+  const fields: unknown[] = [
+    c.legal_name,
+    c.dba_name,
+    c.usdot_number,
+    c.phy_city,
+    c.phy_state,
+    c.drivers,
+    c.power_units,
+    c.phone,
+    c.email,
+    c.census_status === "A" ? "ACTIVE" : c.census_status === "I" ? "INACTIVE" : (c.census_status ?? ""),
+    c.safer_enriched ? "Yes" : "No",
+    c.safety_rating,
+    c.operating_authority_status,
+    joinArr(c.carrier_operation),
+    joinArr(c.operation_classification),
+    joinArr(c.cargo_carried),
+    c.usdot_number ? SAFER_SNAPSHOT_URL(c.usdot_number) : "",
+  ];
+  return fields.map(escCsv).join(",");
+};
+
+const triggerCsvDownload = (rows: CarrierRow[]) => {
+  const date = new Date().toISOString().slice(0, 10);
+  const lines = [
+    CSV_HEADERS.map(escCsv).join(","),
+    ...rows.map(rowToCsvLine),
+  ];
+  const blob = new Blob([lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `carrier-sales-leads-${date}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
 
 // ---------------------------------------------------------------------------
@@ -338,7 +425,72 @@ export const CarrierList: React.FC = () => {
     pagination: { pageSize: 20 },
   });
 
-  // Sync controlled filter state → Refine hook
+  // ── Export — paginated via data provider ─────────────────────────────────
+  const getDataProvider = useDataProvider();
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const exportFilters = useMemo((): CrudFilter[] => {
+    const f: CrudFilter[] = [
+      { field: "census_status", operator: "eq", value: "A" },
+    ];
+    if (minDrivers !== "" && Number(minDrivers) > 0)
+      f.push({ field: "drivers", operator: "gte", value: Number(minDrivers) });
+    if (stateFilter.trim())
+      f.push({ field: "phy_state", operator: "eq", value: stateFilter.trim().toUpperCase() });
+    if (emailOnly)
+      f.push({ field: "email", operator: "nnull", value: null });
+    if (saferUnenriched)
+      f.push({ field: "safer_enriched", operator: "eq", value: false });
+    if (debouncedSearch.trim())
+      f.push({ field: "search", operator: "eq", value: debouncedSearch.trim() });
+    return f;
+  }, [stateFilter, minDrivers, emailOnly, saferUnenriched, debouncedSearch]);
+
+  const EXPORT_PAGE_SIZE = 1000;
+  const EXPORT_MAX_ROWS = 10000;
+
+  const handleExport = async () => {
+    if (rowCount === 0 || exporting) return;
+    setExporting(true);
+    setExportError(null);
+    try {
+      const provider = getDataProvider();
+      const allRows: CarrierRow[] = [];
+      let page = 1;
+
+      while (allRows.length < EXPORT_MAX_ROWS) {
+        const result = await provider.getList<CarrierRow>({
+          resource: "carriers",
+          filters: exportFilters,
+          sorters: [{ field: "drivers", order: "desc" }],
+          pagination: { current: page, pageSize: EXPORT_PAGE_SIZE, mode: "server" },
+        });
+        const rows = result.data ?? [];
+        if (rows.length === 0) break;
+        allRows.push(...rows);
+        if (rows.length < EXPORT_PAGE_SIZE) break; // last page
+        page++;
+      }
+
+      const capped = allRows.slice(0, EXPORT_MAX_ROWS);
+      if (capped.length > 0) {
+        triggerCsvDownload(capped);
+      }
+      if (allRows.length >= EXPORT_MAX_ROWS) {
+        setExportError(
+          `Export capped at ${EXPORT_MAX_ROWS.toLocaleString()} rows. Apply filters to narrow your results.`
+        );
+      }
+    } catch (err) {
+      console.error("CSV export failed:", err);
+      setExportError("Export failed. Please try again.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // ── Sync controlled filter state → Refine hook ───────────────────────────
   const mountRef = useRef(false);
   useEffect(() => {
     if (!mountRef.current) {
@@ -445,6 +597,15 @@ export const CarrierList: React.FC = () => {
               : `${rowCount.toLocaleString()} carrier${rowCount !== 1 ? "s" : ""} found`}
           </Typography>
         </Box>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<DownloadRoundedIcon />}
+          onClick={handleExport}
+          disabled={isLoading || rowCount === 0 || exporting}
+        >
+          {exporting ? "Exporting…" : "Export CSV"}
+        </Button>
       </Stack>
 
       {/* Toolbar */}
@@ -544,6 +705,17 @@ export const CarrierList: React.FC = () => {
             Clear all
           </Button>
         </Stack>
+      )}
+
+      {/* Export error */}
+      {exportError && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          onClose={() => setExportError(null)}
+        >
+          {exportError}
+        </Alert>
       )}
 
       {/* Error alert */}
