@@ -522,7 +522,7 @@ import EditIcon from '@mui/icons-material/Edit';
 
 NavKit (top nav, from `@taruvi/navkit`) ships three color variants — Blue `#2b97ff` (default), White (`#fff` + `#e5e7eb` border), Dark `#004369` (accent `#9de5fd`). Pick the variant in NavKit's `getTheme` callback in [`src/App.tsx`](src/App.tsx), not the MUI theme.
 
-Sidebar widths are constants in [`src/components/sidenav/constants.ts`](src/components/sidenav/constants.ts): collapsed 86px, expanded 240px. Active items pick up `#1976d2` via the theme.
+Sidebar widths are constants in [`src/components/sidenav/MuiSidenav.tsx`](src/components/sidenav/MuiSidenav.tsx): collapsed 72px, expanded 240px. Active items pick up `#1976d2` via the theme.
 
 ---
 

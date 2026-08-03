@@ -6,9 +6,10 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
-import ListRoundedIcon from "@mui/icons-material/ListRounded";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import Dashboard from "@mui/icons-material/Dashboard";
+import MenuIcon from "@mui/icons-material/Menu";
+import Logout from "@mui/icons-material/Logout";
+import ListOutlined from "@mui/icons-material/ListOutlined";
 import { useTranslate, type TreeMenuItem, CanAccess } from "@refinedev/core";
 import { getAclResource } from "../../utils/aclResource";
 
@@ -16,27 +17,23 @@ interface MobileBottomNavProps {
   menuItems: TreeMenuItem[];
   selectedKey: string;
   onNavigate: (route: string) => void;
-  showDashboard?: boolean;
-  dashboardLabel?: string;
-  dashboardRoute?: string;
+  onLogout: () => void;
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   menuItems,
   selectedKey,
   onNavigate,
-  showDashboard = true,
-  dashboardLabel,
-  dashboardRoute = "/",
+  onLogout,
 }) => {
   const t = useTranslate();
-  const resolvedDashboardLabel = dashboardLabel ?? t("dashboard.title", "Dashboard");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const menuOpen = Boolean(anchorEl);
 
   // Show first 3 items in bottom nav, rest in "More" menu
   const visibleItems = menuItems.slice(0, 3);
   const moreItems = menuItems.slice(3);
+  const hasMoreItems = moreItems.length > 0;
 
   const handleMoreClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -51,9 +48,14 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
     handleMoreClose();
   };
 
+  const handleLogoutClick = () => {
+    onLogout();
+    handleMoreClose();
+  };
+
   // Determine which value is selected
   const getSelectedValue = () => {
-    if (showDashboard && (selectedKey === dashboardRoute || selectedKey === "dashboard")) return dashboardRoute;
+    if (selectedKey === "/" || selectedKey === "dashboard") return "/";
     const visibleItem = visibleItems.find(
       (item) => item.route === selectedKey || item.key === selectedKey
     );
@@ -73,7 +75,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           zIndex: 1200,
           borderTop: 1,
           borderColor: "divider",
-          pb: "env(safe-area-inset-bottom)",
         }}
         elevation={3}
       >
@@ -81,14 +82,13 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           value={getSelectedValue()}
           showLabels
         >
-          {showDashboard ? (
-            <BottomNavigationAction
-              label={resolvedDashboardLabel}
-              icon={<DashboardRoundedIcon />}
-              value={dashboardRoute}
-              onClick={() => onNavigate(dashboardRoute)}
-            />
-          ) : null}
+          {/* Dashboard */}
+          <BottomNavigationAction
+            label={t("dashboard.title", "Dashboard")}
+            icon={<Dashboard />}
+            value="/"
+            onClick={() => onNavigate("/")}
+          />
 
           {/* Visible menu items */}
           {visibleItems.map((item, index) => {
@@ -97,12 +97,12 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               <CanAccess
                 key={`visible-${item.key || item.route || item.name || "menu-item"}-${index}`}
                 resource={getAclResource(item)}
-                action="read"
+                action="list"
                 params={{ resource: item }}
               >
                 <BottomNavigationAction
                   label={item.label || item.name}
-                  icon={item.icon || <ListRoundedIcon />}
+                  icon={item.icon || <ListOutlined />}
                   value={route}
                   onClick={() => onNavigate(route)}
                 />
@@ -110,14 +110,15 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             );
           })}
 
-          {moreItems.length > 0 ? (
+          {/* More menu */}
+          {hasMoreItems && (
             <BottomNavigationAction
               label={t("buttons.more", "More")}
-              icon={<MenuRoundedIcon />}
+              icon={<MenuIcon />}
               value="more"
               onClick={handleMoreClick}
             />
-          ) : null}
+          )}
         </BottomNavigation>
       </Paper>
 
@@ -139,18 +140,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           <CanAccess
             key={`more-${item.key || item.route || item.name || "menu-item"}-${index}`}
             resource={getAclResource(item)}
-            action="read"
+            action="list"
             params={{ resource: item }}
           >
             <MenuItem
               onClick={() => handleMoreItemClick(item.route || "/")}
               selected={item.route === selectedKey || item.key === selectedKey}
             >
-              <ListItemIcon>{item.icon || <ListRoundedIcon />}</ListItemIcon>
+              <ListItemIcon>{item.icon || <ListOutlined />}</ListItemIcon>
               <ListItemText primary={item.label || item.name} />
             </MenuItem>
           </CanAccess>
         ))}
+
       </Menu>
     </>
   );

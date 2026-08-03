@@ -56,7 +56,7 @@ export const TestUploadPage = () => {
   const imageUrl = uploadedPath ? getStorageUrl("test-uploads", uploadedPath) : null;
 
   return (
-    <Box sx={{ bgcolor: "#F5F5F5", minHeight: "100vh", py: { xs: 3, md: 4 } }}>
+    <Box sx={{ bgcolor: "#F5F5F5", minHeight: "100vh", py: 6 }}>
       <Container maxWidth="md">
         {/* Header */}
         <Box sx={{ mb: 6, textAlign: "center" }}>

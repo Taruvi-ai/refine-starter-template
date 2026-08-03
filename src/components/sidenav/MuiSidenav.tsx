@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -10,196 +10,43 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import TextField from "@mui/material/TextField";
-import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import MenuIcon from "@mui/icons-material/Menu";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import Dashboard from "@mui/icons-material/Dashboard";
+import Logout from "@mui/icons-material/Logout";
+import SearchIcon from "@mui/icons-material/Search";
 
 import {
   useMenu,
+  useLogout,
+  useIsExistAuthentication,
   useTranslate,
+  useWarnAboutChange,
   type TreeMenuItem,
 } from "@refinedev/core";
 
 import { MenuItem } from "./MenuItem";
 import { MobileBottomNav } from "./MobileBottomNav";
-import { DRAWER_COLLAPSED_LABEL_MAX_WIDTH, DRAWER_WIDTH_COLLAPSED, DRAWER_WIDTH_EXPANDED } from "./constants";
-import { useKaizenRoles } from "../../pages/kaizens/shared";
-import { formatMenuLabel } from "./labels";
 import "./sidenav.css";
 
-const MY_KAIZEN_RESOURCE_NAME = "kaizen_ideas";
-const MY_KAIZEN_ROUTE = "/kaizens";
-const KAIZEN_CREATE_ROUTE = "/kaizens/create";
-const REVIEW_RESOURCE_NAME = "kaizen_reviews";
-const REVIEW_ROUTE = "/reviews";
-const NOTIFICATION_RESOURCE_NAME = "kaizen_notifications";
-const NOTIFICATION_ROUTE = "/notifications";
-const SETTINGS_RESOURCE_NAME = "kaizen_settings";
-const SETTINGS_ROUTE = "/settings";
-const CERTIFICATE_RESOURCE_NAME = "kaizen_certificates";
-const CERTIFICATE_ROUTES = new Set(["/certificates", "/certificate", "/certificate-templates"]);
-const TEAM_DASHBOARD_RESOURCE_NAME = "kaizen_team_dashboard";
-const TEAM_DASHBOARD_ROUTE = "/team-dashboard";
-const OM_SOM_DASHBOARD_RESOURCE_NAME = "kaizen_om_som_dashboard";
-const OM_SOM_DASHBOARD_ROUTE = "/om-som-dashboard";
-const SIDENAV_RESOURCE_NAMES = new Set([
-  "kaizen_ideas",
-  "kaizen_team_dashboard",
-  "kaizen_om_som_dashboard",
-  "kaizen_reviews",
-  "kaizen_notifications",
-  "kaizen_leaderboard",
-  "kaizen_reports",
-  "kaizen_global_search",
-  "kaizen_high_impact_analyses",
-  "kaizen_certificates",
-  "kaizen_settings",
-]);
-const SIDENAV_ROUTES = new Set([
-  "/kaizens",
-  "/team-dashboard",
-  "/om-som-dashboard",
-  "/reviews",
-  "/notifications",
-  "/leaderboard",
-  "/reports",
-  "/search",
-  "/high-impact-analysis",
-  "/certificates",
-  "/certificate",
-  "/certificate-templates",
-  "/settings",
-]);
+const DRAWER_WIDTH_EXPANDED = 240;
+const DRAWER_WIDTH_COLLAPSED = 72;
+const MAX_LABEL_EXPANDED = 40;
+const MAX_LABEL_COLLAPSED = 10;
 
-const isReviewsMenuItem = (item: TreeMenuItem) =>
-  item.name === REVIEW_RESOURCE_NAME ||
-  item.key === REVIEW_RESOURCE_NAME ||
-  item.route === REVIEW_ROUTE ||
-  item.label === "Reviews";
-
-const isNotificationsMenuItem = (item: TreeMenuItem) =>
-  item.name === NOTIFICATION_RESOURCE_NAME ||
-  item.key === NOTIFICATION_RESOURCE_NAME ||
-  item.route === NOTIFICATION_ROUTE ||
-  item.label === "Notification" ||
-  item.label === "Notifications";
-
-const isSettingsMenuItem = (item: TreeMenuItem) =>
-  item.name === SETTINGS_RESOURCE_NAME ||
-  item.key === SETTINGS_RESOURCE_NAME ||
-  item.route === SETTINGS_ROUTE ||
-  item.label === "Settings";
-
-const isCertificateMenuItem = (item: TreeMenuItem) =>
-  item.name === CERTIFICATE_RESOURCE_NAME ||
-  item.key === CERTIFICATE_RESOURCE_NAME ||
-  CERTIFICATE_ROUTES.has(item.route ?? "") ||
-  item.label === "Certificate" ||
-  item.label === "Certificates";
-
-const isMyKaizenMenuItem = (item: TreeMenuItem) =>
-  item.name === MY_KAIZEN_RESOURCE_NAME ||
-  item.key === MY_KAIZEN_RESOURCE_NAME ||
-  item.route === MY_KAIZEN_ROUTE ||
-  item.label === "My Kaizen" ||
-  item.label === "Kaizen";
-
-const isKaizenCreateMenuItem = (item: TreeMenuItem) =>
-  item.route === KAIZEN_CREATE_ROUTE ||
-  item.key === KAIZEN_CREATE_ROUTE ||
-  item.name === "kaizen_ideas.create" ||
-  item.label === "Create Kaizen" ||
-  item.label === "Submit Kaizen";
-
-const isTeamDashboardMenuItem = (item: TreeMenuItem) =>
-  item.name === TEAM_DASHBOARD_RESOURCE_NAME ||
-  item.key === TEAM_DASHBOARD_RESOURCE_NAME ||
-  item.route === TEAM_DASHBOARD_ROUTE ||
-  item.label === "Team Dashboard";
-
-const isOmSomDashboardMenuItem = (item: TreeMenuItem) =>
-  item.name === OM_SOM_DASHBOARD_RESOURCE_NAME ||
-  item.key === OM_SOM_DASHBOARD_RESOURCE_NAME ||
-  item.route === OM_SOM_DASHBOARD_ROUTE ||
-  item.label === "OM/SOM Dashboard" ||
-  item.label === "Team's Dashboard";
-
-const isSidenavMenuItem = (item: TreeMenuItem) =>
-  SIDENAV_RESOURCE_NAMES.has(item.name ?? "") ||
-  SIDENAV_RESOURCE_NAMES.has(item.key ?? "") ||
-  SIDENAV_ROUTES.has(item.route ?? "");
-
-const isLeadManagerOnly = (roles: ReturnType<typeof useKaizenRoles>) =>
-  roles.isManager && !roles.isAdmin && !roles.isOmSom && !roles.isPeQa;
-
-const isOmSomOnly = (roles: ReturnType<typeof useKaizenRoles>) =>
-  roles.isOmSom && !roles.isAdmin && !roles.isPeQa;
-
-const orderOmSomMenuItems = (items: TreeMenuItem[]) => {
-  const reviewIndex = items.findIndex(isReviewsMenuItem);
-  const kaizenIndex = items.findIndex(isMyKaizenMenuItem);
-  if (reviewIndex < 0 || kaizenIndex < 0 || kaizenIndex === reviewIndex + 1) return items;
-
-  const ordered = [...items];
-  const [kaizenItem] = ordered.splice(kaizenIndex, 1);
-  const nextReviewIndex = ordered.findIndex(isReviewsMenuItem);
-  ordered.splice(nextReviewIndex + 1, 0, kaizenItem);
-  return ordered;
-};
-
-const filterSidenavMenuItems = (items: TreeMenuItem[], roles: ReturnType<typeof useKaizenRoles>): TreeMenuItem[] => {
-  const leadManagerOnly = isLeadManagerOnly(roles);
-  const omSomOnly = isOmSomOnly(roles);
-
-  return items.flatMap((item) => {
-    if (!roles.canSubmitKaizen && isKaizenCreateMenuItem(item)) return [];
-    if (roles.isAdmin && (isReviewsMenuItem(item) || isNotificationsMenuItem(item))) return [];
-    if (!roles.isSuperAdmin && isSettingsMenuItem(item)) return [];
-    if (leadManagerOnly && isMyKaizenMenuItem(item)) return [];
-    if (!roles.isSuperAdmin && isCertificateMenuItem(item)) return [];
-
-    if (isTeamDashboardMenuItem(item)) {
-      if (!leadManagerOnly) return [];
-
-      const children = item.children?.length
-        ? filterSidenavMenuItems(item.children, roles)
-            .filter((child) => !isReviewsMenuItem(child))
-        : [];
-
-      return [{ ...item, children }];
-    }
-
-    if (isOmSomDashboardMenuItem(item)) {
-      if (!omSomOnly) return [];
-
-      const children = item.children?.length
-        ? filterSidenavMenuItems(item.children, roles)
-            .filter((child) => !isReviewsMenuItem(child))
-        : [];
-
-      return [{ ...item, children }];
-    }
-
-    if (!roles.canReview && isReviewsMenuItem(item)) return [];
-
-    const children = item.children?.length
-      ? filterSidenavMenuItems(item.children, roles)
-      : [];
-
-    if (isSidenavMenuItem(item)) {
-      return item.children?.length || children.length ? [{ ...item, children }] : [item];
-    }
-
-    if (children.length > 0) {
-      return [{ ...item, children }];
-    }
-
-    return [];
-  });
+const truncateLabel = (text: string, expanded: boolean) => {
+  if (expanded) {
+    return text.length > MAX_LABEL_EXPANDED ? text.slice(0, MAX_LABEL_EXPANDED) + "…" : text;
+  }
+  const spaceIdx = text.indexOf(" ");
+  if (spaceIdx === -1) {
+    return text.length > MAX_LABEL_COLLAPSED ? text.slice(0, MAX_LABEL_COLLAPSED) + "…" : text;
+  }
+  const line1 = text.slice(0, spaceIdx);
+  const rest = text.slice(spaceIdx + 1);
+  const line2 = rest.length > MAX_LABEL_COLLAPSED ? rest.slice(0, MAX_LABEL_COLLAPSED) + "…" : rest;
+  return line1 + "\n" + line2;
 };
 
 interface MuiSidenavProps {
@@ -214,17 +61,9 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
   const t = useTranslate();
 
   const { menuItems, selectedKey } = useMenu({ meta });
-  const roles = useKaizenRoles();
-  const omSomOnly = isOmSomOnly(roles);
-  const leadManagerOnly = isLeadManagerOnly(roles);
-
-  const roleFilteredMenuItems = useMemo(
-    () => {
-      const filteredItems = filterSidenavMenuItems(menuItems, roles);
-      return omSomOnly ? orderOmSomMenuItems(filteredItems) : filteredItems;
-    },
-    [menuItems, omSomOnly, roles],
-  );
+  const isAuthenticated = useIsExistAuthentication();
+  const { mutate: mutateLogout } = useLogout();
+  const { warnWhen, setWarnWhen } = useWarnAboutChange();
 
   const handleToggle = () => {
     if (expanded) setSearchQuery("");
@@ -241,12 +80,11 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
   };
 
   const filteredMenuItems = normalizedQuery
-    ? roleFilteredMenuItems.filter(itemMatchesQuery)
-    : roleFilteredMenuItems;
+    ? menuItems.filter(itemMatchesQuery)
+    : menuItems;
 
-  const dashboardLabel = roles.isAdmin ? "Executive View Dashboard" : t("dashboard.title", "Dashboard");
-  const dashboardRoute = leadManagerOnly ? TEAM_DASHBOARD_ROUTE : "/";
-  const showDashboard = !leadManagerOnly && !omSomOnly && (!normalizedQuery || matchesQuery(dashboardLabel));
+  const dashboardLabel = t("dashboard.title", "Dashboard");
+  const showDashboard = !normalizedQuery || matchesQuery(dashboardLabel);
 
   const handleNavigate = useCallback(
     (route: string) => {
@@ -255,23 +93,39 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
     [navigate]
   );
 
-  const isDashboardSelected = location.pathname === dashboardRoute;
+  const handleLogout = useCallback(() => {
+    if (warnWhen) {
+      const confirm = window.confirm(
+        t(
+          "warnWhenUnsavedChanges",
+          "Are you sure you want to leave? You have unsaved changes."
+        )
+      );
+      if (confirm) {
+        setWarnWhen(false);
+        mutateLogout();
+      }
+    } else {
+      mutateLogout();
+    }
+  }, [warnWhen, setWarnWhen, mutateLogout, t]);
+
+  const isDashboardSelected = location.pathname === "/";
   const drawerWidth = expanded ? DRAWER_WIDTH_EXPANDED : DRAWER_WIDTH_COLLAPSED;
 
-  const dashboardButtonContent = (
+  const dashboardButton = (
     <ListItemButton
-      aria-label={dashboardLabel}
-      onClick={() => handleNavigate(dashboardRoute)}
+      onClick={() => handleNavigate("/")}
       selected={isDashboardSelected}
       sx={{
-        minHeight: expanded ? 48 : 64,
+        minHeight: 48,
         flexDirection: expanded ? "row" : "column",
         justifyContent: expanded ? "initial" : "center",
         alignItems: "center",
-        borderRadius: 1.25,
-        mx: 1,
+        borderRadius: expanded ? 1 : 0,
+        mx: expanded ? 1 : 0,
         mb: 0.5,
-        py: expanded ? 1 : 0.75,
+        py: expanded ? 1 : 1.5,
       }}
     >
       <ListItemIcon
@@ -281,41 +135,67 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
           justifyContent: "center",
         }}
       >
-        <DashboardRoundedIcon />
+        <Dashboard />
       </ListItemIcon>
       <ListItemText
-        primary={formatMenuLabel(dashboardLabel, expanded)}
+        primary={truncateLabel(t("dashboard.title", "Dashboard"), expanded)}
         sx={{
           m: 0,
           mt: expanded ? 0 : 0.5,
           textAlign: expanded ? "left" : "center",
-          width: expanded ? "auto" : "100%",
           "& .MuiListItemText-primary": {
-            display: "block",
-            maxWidth: expanded ? "100%" : DRAWER_COLLAPSED_LABEL_MAX_WIDTH,
-            overflow: "hidden",
-            textOverflow: expanded ? "ellipsis" : "clip",
-            fontFamily: "'Quicksand', sans-serif",
-            fontSize: expanded ? 12 : 10.5,
-            fontWeight: isDashboardSelected ? 700 : 600,
-            lineHeight: expanded ? 1.35 : 1.12,
-            letterSpacing: 0,
+            fontSize: expanded ? 12 : 10,
+            fontWeight: isDashboardSelected ? 600 : 500,
           },
         }}
         primaryTypographyProps={{
           noWrap: expanded,
-          whiteSpace: expanded ? "nowrap" : "pre-line",
+          whiteSpace: expanded ? "nowrap" : "pre",
         }}
       />
     </ListItemButton>
   );
 
-  const dashboardButton = expanded ? (
-    dashboardButtonContent
-  ) : (
-    <Tooltip title={dashboardLabel} placement="right">
-      {dashboardButtonContent}
-    </Tooltip>
+  const logoutButton = (
+    <ListItemButton
+      onClick={handleLogout}
+      sx={{
+        minHeight: 48,
+        flexDirection: expanded ? "row" : "column",
+        justifyContent: expanded ? "initial" : "center",
+        alignItems: "center",
+        borderRadius: expanded ? 1 : 0,
+        mx: expanded ? 1 : 0,
+        mb: 0.5,
+        py: expanded ? 1 : 1.5,
+      }}
+    >
+      <ListItemIcon
+        sx={{
+          minWidth: 0,
+          mr: expanded ? 2 : 0,
+          justifyContent: "center",
+        }}
+      >
+        <Logout />
+      </ListItemIcon>
+      <ListItemText
+        primary={truncateLabel(t("buttons.logout", "Logout"), expanded)}
+        sx={{
+          m: 0,
+          mt: expanded ? 0 : 0.5,
+          textAlign: expanded ? "left" : "center",
+          "& .MuiListItemText-primary": {
+            fontSize: expanded ? 12 : 10,
+            fontWeight: 500,
+          },
+        }}
+        primaryTypographyProps={{
+          noWrap: expanded,
+          whiteSpace: expanded ? "nowrap" : "pre",
+        }}
+      />
+    </ListItemButton>
   );
 
   return (
@@ -325,9 +205,6 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
         variant="permanent"
         sx={{
           display: { xs: "none", md: "block" },
-          flexShrink: 0,
-          width: drawerWidth,
-          transition: "width 0.2s ease-in-out",
           "& .MuiDrawer-paper": {
             position: "fixed",
             top: "var(--nav-height, 60px)",
@@ -369,16 +246,9 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchRoundedIcon fontSize="small" />
+                      <SearchIcon fontSize="small" />
                     </InputAdornment>
                   ),
-                  endAdornment: searchQuery ? (
-                    <InputAdornment position="end">
-                      <IconButton size="small" aria-label="Clear menu search" onClick={() => setSearchQuery("")}>
-                        <CloseRoundedIcon fontSize="small" />
-                      </IconButton>
-                    </InputAdornment>
-                  ) : null,
                 }}
                 sx={{
                   flex: 1,
@@ -386,8 +256,8 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
                 }}
               />
             )}
-            <IconButton aria-label={expanded ? "Collapse navigation" : "Expand navigation"} onClick={handleToggle}>
-              {expanded ? <ChevronLeftRoundedIcon /> : <MenuRoundedIcon />}
+            <IconButton onClick={handleToggle}>
+              {expanded ? <ChevronLeftIcon /> : <MenuIcon />}
             </IconButton>
           </Box>
 
@@ -417,17 +287,17 @@ export const MuiSidenav: React.FC<MuiSidenavProps> = ({ meta }) => {
               </Box>
             )}
           </List>
+
+          {/* Logout */}
         </Box>
       </Drawer>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav
-        menuItems={roleFilteredMenuItems}
+        menuItems={menuItems}
         selectedKey={selectedKey || location.pathname}
         onNavigate={handleNavigate}
-        showDashboard={!leadManagerOnly && !omSomOnly}
-        dashboardLabel={dashboardLabel}
-        dashboardRoute={dashboardRoute}
+        onLogout={handleLogout}
       />
     </>
   );
