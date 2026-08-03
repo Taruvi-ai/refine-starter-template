@@ -1,31 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import IconButton from "@mui/material/IconButton";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Collapse from "@mui/material/Collapse";
 import List from "@mui/material/List";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import ListOutlined from "@mui/icons-material/ListOutlined";
+import Tooltip from "@mui/material/Tooltip";
+import ExpandLessRoundedIcon from "@mui/icons-material/ExpandLessRounded";
+import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
+import ListRoundedIcon from "@mui/icons-material/ListRounded";
 import { CanAccess, type TreeMenuItem } from "@refinedev/core";
 import { getAclResource } from "../../utils/aclResource";
+import { DRAWER_COLLAPSED_LABEL_MAX_WIDTH } from "./constants";
+import { formatMenuLabel } from "./labels";
 
-const MAX_LABEL_EXPANDED = 40;
-const MAX_LABEL_COLLAPSED = 10;
-
-const truncateLabel = (text: string, expanded: boolean) => {
-  if (expanded) {
-    return text.length > MAX_LABEL_EXPANDED ? text.slice(0, MAX_LABEL_EXPANDED) + "…" : text;
-  }
-  const spaceIdx = text.indexOf(" ");
-  if (spaceIdx === -1) {
-    return text.length > MAX_LABEL_COLLAPSED ? text.slice(0, MAX_LABEL_COLLAPSED) + "…" : text;
-  }
-  const line1 = text.slice(0, spaceIdx);
-  const rest = text.slice(spaceIdx + 1);
-  const line2 = rest.length > MAX_LABEL_COLLAPSED ? rest.slice(0, MAX_LABEL_COLLAPSED) + "…" : rest;
-  return line1 + "\n" + line2;
-};
+const isSelectedMenuItem = (item: TreeMenuItem, selectedKey: string): boolean =>
+  item.key === selectedKey ||
+  item.route === selectedKey ||
+  Boolean(item.children?.some((child) => isSelectedMenuItem(child, selectedKey)));
 
 interface MenuItemProps {
   item: TreeMenuItem;
@@ -45,31 +37,40 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   const [open, setOpen] = useState(false);
 
   const hasChildren = item.children && item.children.length > 0;
-  const isSelected = item.key === selectedKey || item.route === selectedKey;
+  const hasSelectedChild = Boolean(item.children?.some((child) => isSelectedMenuItem(child, selectedKey)));
+  const isSelected = item.key === selectedKey || item.route === selectedKey || hasSelectedChild;
   const paddingLeft = expanded ? 2 + depth * 2 : 1;
+  const label = item.label || item.name || "Menu item";
+
+  useEffect(() => {
+    if (expanded && hasSelectedChild) {
+      setOpen(true);
+    }
+  }, [expanded, hasSelectedChild]);
 
   const handleClick = () => {
-    if (hasChildren) {
-      setOpen(!open);
-    } else if (item.route) {
+    if (item.route) {
       onNavigate(item.route);
+    } else if (hasChildren) {
+      setOpen(!open);
     }
   };
 
   const button = (
     <ListItemButton
+      aria-label={label}
       onClick={handleClick}
       selected={isSelected}
       sx={{
         pl: expanded ? paddingLeft : undefined,
-        minHeight: 48,
+        minHeight: expanded ? 48 : 64,
         flexDirection: expanded ? "row" : "column",
         justifyContent: expanded ? "initial" : "center",
         alignItems: "center",
-        borderRadius: expanded ? 1 : 0,
-        mx: expanded ? 1 : 0,
+        borderRadius: 1.25,
+        mx: 1,
         mb: 0.5,
-        py: expanded ? 1 : 1.5,
+        py: expanded ? 1 : 0.75,
       }}
     >
       <ListItemIcon
@@ -79,29 +80,53 @@ export const MenuItem: React.FC<MenuItemProps> = ({
           justifyContent: "center",
         }}
       >
-        {item.icon || <ListOutlined />}
+        {item.icon || <ListRoundedIcon />}
       </ListItemIcon>
       <ListItemText
-        primary={truncateLabel(item.label || item.name, expanded)}
+        primary={formatMenuLabel(label, expanded)}
         sx={{
           m: 0,
           mt: expanded ? 0 : 0.5,
           textAlign: expanded ? "left" : "center",
+          width: expanded ? "auto" : "100%",
           "& .MuiListItemText-primary": {
-            fontSize: expanded ? 12 : 10,
-            fontWeight: isSelected ? 600 : 500,
+            display: "block",
+            maxWidth: expanded ? "100%" : DRAWER_COLLAPSED_LABEL_MAX_WIDTH,
+            overflow: "hidden",
+            textOverflow: expanded ? "ellipsis" : "clip",
+            fontFamily: "'Quicksand', sans-serif",
+            fontSize: expanded ? 12 : 10.5,
+            fontWeight: isSelected ? 700 : 600,
+            lineHeight: expanded ? 1.35 : 1.12,
+            letterSpacing: 0,
           },
         }}
         primaryTypographyProps={{
           noWrap: expanded,
-          whiteSpace: expanded ? "nowrap" : "pre",
+          whiteSpace: expanded ? "nowrap" : "pre-line",
         }}
       />
-      {hasChildren && expanded && (open ? <ExpandLess /> : <ExpandMore />)}
+      {hasChildren && expanded && (
+        <IconButton
+          size="small"
+          aria-label={open ? `Collapse ${label}` : `Expand ${label}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            setOpen((current) => !current);
+          }}
+          sx={{ ml: "auto", p: 0.5 }}
+        >
+          {open ? <ExpandLessRoundedIcon fontSize="small" /> : <ExpandMoreRoundedIcon fontSize="small" />}
+        </IconButton>
+      )}
     </ListItemButton>
   );
 
-  const wrappedButton = button;
+  const wrappedButton = expanded ? button : (
+    <Tooltip title={label} placement="right">
+      {button}
+    </Tooltip>
+  );
 
   return (
     <CanAccess
