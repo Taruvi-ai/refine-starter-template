@@ -1,8 +1,11 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 import hashlib
+import logging
 import math
 import re
+
+logger = logging.getLogger(__name__)
 
 MODEL = "text-embedding-3-small"
 DIMENSIONS = 512
@@ -367,10 +370,9 @@ def detect(params, db, sdk_client):
             cache = ensure_embeddings(db, client, candidates)
     except Exception as exc:
         client, query_vectors, cache = None, None, {}
-        log(
-            "Embedding comparison unavailable; using fallback",
-            level="warning",
-            data={"error": str(exc)},
+        logger.warning(
+            "Embedding comparison unavailable; using fallback: %s",
+            exc,
         )
     matches = []
     display_threshold = float(

@@ -1,13 +1,19 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 import base64
+import binascii
 import io
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 CERTIFICATE_BUCKET = "kaizen-attachments"
 CERTIFICATE_TEMPLATE_PATH = "certificate-templates/kaizen-certificate-2026.png"
 CERTIFICATE_WIDTH = 841
 CERTIFICATE_HEIGHT = 594
+MAX_TEMPLATE_UPLOAD_BYTES = 10 * 1024 * 1024
+MAX_TEMPLATE_BASE64_LENGTH = ((MAX_TEMPLATE_UPLOAD_BYTES + 2) // 3) * 4
 
 
 def now_iso():
@@ -328,7 +334,14 @@ def regenerate_certificate(db, sdk_client, idea_id):
 
     issued_at = idea.get("closed_at") or idea.get("updated_at") or now_iso()
     path = idea.get("certificate_path") or certificate_path_for(idea)
-    template_bytes = sdk_client.storage.from_(CERTIFICATE_BUCKET).download(CERTIFICATE_TEMPLATE_PATH)
+    try:
+        template_bytes = sdk_client.storage.from_(CERTIFICATE_BUCKET).download(CERTIFICATE_TEMPLATE_PATH)
+    except Exception as exc:
+        logger.warning(
+            "Certificate template download failed; using the built-in fallback: %s",
+            exc,
+        )
+        template_bytes = None
     svg = certificate_svg(idea, issued_at, template_bytes)
     upload_certificate_file(sdk_client, path, svg)
 
@@ -352,7 +365,17 @@ def data_url_bytes(value):
     text = str(value or "")
     if "," in text and text.lower().startswith("data:"):
         text = text.split(",", 1)[1]
-    return base64.b64decode(text)
+    if not text:
+        raise ValueError("Template file data is empty")
+    if len(text) > MAX_TEMPLATE_BASE64_LENGTH:
+        raise ValueError("Template file exceeds the 10 MB upload limit")
+    try:
+        decoded = base64.b64decode(text, validate=True)
+    except (binascii.Error, ValueError) as exc:
+        raise ValueError("Template file is not valid base64 data") from exc
+    if len(decoded) > MAX_TEMPLATE_UPLOAD_BYTES:
+        raise ValueError("Template file exceeds the 10 MB upload limit")
+    return decoded
 
 
 def upload_template(params, sdk_client):
@@ -362,8 +385,12 @@ def upload_template(params, sdk_client):
     if not file_base64:
         return {"success": False, "error": "file_base64 is required"}
     filename = path.split("/")[-1] or "certificate-template"
+    try:
+        template_bytes = data_url_bytes(file_base64)
+    except ValueError as exc:
+        return {"success": False, "error": str(exc)}
     sdk_client.storage.from_(CERTIFICATE_BUCKET).upload(
-        files=[(filename, io.BytesIO(data_url_bytes(file_base64)))],
+        files=[(filename, io.BytesIO(template_bytes))],
         paths=[path],
         metadatas=[{"description": "Certificate template asset", "content_type": content_type}],
     )

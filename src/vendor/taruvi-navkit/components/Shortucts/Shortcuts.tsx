@@ -33,7 +33,7 @@ const Shortcuts = (props: ShortcutsProps) => {
         <>
             {/* Desktop view - inline shortcuts */}
             <Box sx={shortcutsStyles.desktopContainer}>
-                {shortcuts?.map((shortcut) => (
+                {isUserAuthenticated && shortcuts?.map((shortcut) => (
                     <Link
                         key={shortcut.id}
                         onClick={() => handleShortcutClick(shortcut)}
@@ -57,7 +57,7 @@ const Shortcuts = (props: ShortcutsProps) => {
             </Box>
 
             {/* Mobile view - trigger button */}
-            {((shortcuts?.length ?? 0) > 0 || (siteSettings['show-chat'] && siteSettings['chat-url'] && isUserAuthenticated)) && (
+            {isUserAuthenticated && ((shortcuts?.length ?? 0) > 0 || (siteSettings['show-chat'] && siteSettings['chat-url'])) && (
                 <IconButton
                     ref={triggerRef}
                     onClick={onMenuToggle}
