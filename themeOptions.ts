@@ -236,7 +236,7 @@ export const taruviTokens = {
   // Component dimensions
   size: {
     navHeight: 64,
-    sidebarCollapsed: 72,
+    sidebarCollapsed: 86,
     sidebarExpanded: 200,
     sidebarItemMinHeight: 48,
     iconButton: 38,
