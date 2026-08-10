@@ -97,11 +97,13 @@ Every page satisfies these. They're the WCAG items MUI does *not* give you free.
 - **Icon-only controls carry a real name** — `<IconButton aria-label="Delete project">`. A `<Tooltip>` is not an accessible name.
 - **Color never carries meaning alone.** Status chips carry text, charts carry labels or patterns, errors carry icon + text.
 - **Content text never uses `text.disabled`** (2.8:1, fails AA). Use `text.secondary`. `text.disabled` is for genuinely disabled controls.
-- **Async changes announce** — `role="alert"` for errors, `aria-live="polite"` for toasts, save confirmations, result counts, selection counts.
+- **Errors announce** — `role="alert"` on error messages so failures aren't silent to screen readers.
 - **Never remove focus outlines** without a `:focus-visible` replacement.
 - **Touch targets ≥ 24px, primary actions ≥ 44px.** `size="small"` `IconButton` is 30px — fine in a dense table row, not for a primary mobile action.
-- **Landmarks present** (`<main>`, `<nav>`, `<header>`), skip link first in tab order, `document.title` updates on route change.
+- **Landmarks present** (`<main>`, `<nav>`, `<header>`), `document.title` updates on route change.
 - **Modals** get `aria-labelledby` pointing at the `DialogTitle` id. MUI handles the focus trap and Esc; it does not wire the label.
+
+> **Beyond the floor — judgment, not required.** Worth it on tools that warrant the polish, optional on everyday internal apps: `aria-live="polite"` announcements for toasts / save confirmations / result & selection counts, and a skip link first in tab order. Dropping these means an app isn't *strictly* WCAG-AA on status messages (4.1.3) and bypass-blocks (2.4.1) — a fine trade for internal tooling, but make it a deliberate one.
 
 **Token gaps — all landed.** These were open against `themeOptions.ts`; they are fixed there now, so use the tokens as-is and don't re-patch them per component. Ratios below are measured, not estimated.
 
@@ -152,7 +154,7 @@ Full accessibility auditing is handled by the **ui-ux-reviewer** agent ([`.claud
 4. **Active-filter chip row** when ≥1 filter is set — `<field>: <value>`, `×` removes one, "Clear all" resets filters and keeps search.
 5. **Server-side pagination**, default 10 rows, via `useTable`/`useDataGrid`.
 6. **All four empty states** (§4.5), selected via `totalCount === 0 && filters.length === 0 && !search`.
-7. **Result count announced** — an `aria-live="polite"` region reporting `{total} results` so search and filter changes aren't silent to screen readers.
+7. *(Judgment, not required — see §3 "Beyond the floor")* **Result count announced** — an `aria-live="polite"` region reporting `{total} results` so search and filter changes aren't silent to screen readers. Recommended on tools that warrant it; optional on internal apps.
 
 Row hover and selected states are theme-wired; leave them alone.
 
@@ -280,9 +282,11 @@ Required: `aria-labelledby` points at the title id · title is the real question
 
 > **Judgment** — friction should scale with severity. Type-to-confirm is for irreversible bulk or account-level actions, not routine deletes. For frequent reversible actions, an undo window beats a dialog; confirmation fatigue defeats confirmation.
 
-### 4.5 Empty states — four variants
+### 4.5 Empty states
 
-Pick by trigger. A generic "no data" for all four is a defect.
+**Required (floor):** never a blank list — every list has at least an *empty* state (nothing here yet) and an *error* state (couldn't load), each with a heading and a next action.
+
+**Judgment — the full four-variant treatment.** Distinguishing the states below by trigger is better UX where it's worth it; a single generic "no data" for all four is a defect *once you've opted into the distinction*. Two states (empty / error) is an acceptable floor for internal apps.
 
 | Variant | When | Icon | CTA |
 |---|---|---|---|
@@ -308,7 +312,9 @@ Pick by trigger. A generic "no data" for all four is a defect.
 
 ### 4.6 Loading states
 
-**Never leave a region blank while data loads.**
+**Required (floor):** never leave a region blank while data loads — show *something* (a skeleton or a spinner).
+
+**Judgment — which variant.** The mapping below is the recommended default; picking skeleton vs. spinner overlay vs. inline is a judgment call, not a mandate.
 
 | Variant | Use when | How |
 |---|---|---|
