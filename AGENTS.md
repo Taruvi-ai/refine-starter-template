@@ -56,6 +56,12 @@ For anything that renders or styles UI:
 
 If `UI_Guidelines.md` or `themeOptions.ts` is missing, stop and tell the user.
 
+## Internal-app standard features
+
+Internal Taruvi apps must ship the standard features in
+[`docs/standard-tasks.md`](docs/standard-tasks.md) (e.g. the **Report an issue**
+Navkit item). Each is an idempotent prompt — apply the ones an app is missing.
+
 ## User data access rule (mandatory)
 
 Taruvi provides built-in user management (users, roles, auth). **Never** create
