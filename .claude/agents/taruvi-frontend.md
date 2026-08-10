@@ -6,7 +6,6 @@ description: >
   useList, useCan…); building production-ready list pages, dashboards, KPI cards,
   forms, file managers; calling Taruvi functions/analytics from the browser.
   Use for any React/Refine UI task. NOT for schema/policy/Python-function work.
-tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
 ---
 
