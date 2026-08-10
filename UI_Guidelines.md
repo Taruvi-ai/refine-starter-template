@@ -73,12 +73,14 @@ Intentional separation of *brand* tones, *operational status* tones, and *chart*
 | IN PROGRESS | `<Chip color="info" label="IN PROGRESS" />` |
 | REVIEW / PLANNING | `<Chip color="warning" label="REVIEW" />` |
 | DELAYED / CANCELLED | `<Chip color="error" label="DELAYED" />` |
-| ON HOLD | `<Chip label="ON HOLD" sx={{ bgcolor: '#7b1fa2', color: '#fff' }} />` |
-| TO DO | `<Chip label="TO DO" sx={{ bgcolor: '#00acc1', color: '#fff' }} />` |
+| ON HOLD | `<Chip label="ON HOLD" sx={{ bgcolor: taruviTokens.status.onHold, color: '#fff' }} />` (white on `#7b1fa2` = 8.20:1) |
+| TO DO | `<Chip label="TO DO" sx={{ bgcolor: taruviTokens.status.todo, color: taruviTokens.text.primary }} />` — **dark** label: `#00acc1` is a light fill, and white on it is only 2.74:1 |
 
-**Priority** — outlined: `<Chip variant="outlined" color="error|warning|success" label="HIGH|MEDIUM|LOW" />`
+> **Both `sx` chips carry a measured label color, not a reflexive `#fff`.** A mid-light fill needs a dark label. This example previously specified `color: '#fff'` on `#00acc1`; every page that copied it shipped a 2.74:1 chip. If you add a fill here, measure it — don't pattern-match the row above.
 
-**Category / tag** — pastel rotation, no `sx` needed: `<Chip variant="tagBlue" label="Design" />` (+ `tagPurple` / `tagGreen` / `tagOrange`). For deterministic rotation, hash the tag name to an index into those four. Raw values at `taruviTokens.tagPalette[i]`.
+**Priority** — outlined: `<Chip variant="outlined" color="error|warning|success" label="HIGH|MEDIUM|LOW" />`. The theme supplies the outlined label/border tone per color and per mode; don't set `color` or `borderColor` by hand.
+
+**Category / tag** — pastel rotation, no `sx` needed: `<Chip variant="tagBlue" label="Design" />` (+ `tagPurple` / `tagGreen` / `tagOrange` / `tagTeal` / `tagPink` / `tagLime` / `tagRose`). Eight variants, so a tenant with more than four categories still gets a distinct preset each. For deterministic rotation, hash the tag name to an index into those eight with a small `tagVariant()` helper whose order matches `taruviTokens.tagPalette[i]`. Only ever **append** to that palette; reordering repaints every existing tag.
 
 Every chip carries a text label — status is never a colored dot or bare fill. Deletable chips name their delete control: `deleteIcon={<CloseRoundedIcon aria-label="Remove Status filter" />}`.
 
@@ -101,14 +103,25 @@ Every page satisfies these. They're the WCAG items MUI does *not* give you free.
 - **Landmarks present** (`<main>`, `<nav>`, `<header>`), skip link first in tab order, `document.title` updates on route change.
 - **Modals** get `aria-labelledby` pointing at the `DialogTitle` id. MUI handles the focus trap and Esc; it does not wire the label.
 
-**Known token gaps** — fix in `themeOptions.ts`, not per component. Don't build new surfaces on these until they land:
+**Token gaps — all landed.** These were open against `themeOptions.ts`; they are fixed there now, so use the tokens as-is and don't re-patch them per component. Ratios below are measured, not estimated.
 
-| Token | Measured | Required |
+| Token | Was | Now |
 |---|---|---|
-| Focus ring `rgba(30,136,229,0.35)` | ≈1.5:1 on white | 3:1 — use a solid `#1E88E5` ring |
-| White on `button.primaryDefault` `#1E88E5` | ≈3.7:1 | 4.5:1 — `#1976d2` gives 4.6:1 |
-| White on warning chip `#f57c00` | ≈2.7:1 | 4.5:1 — use dark text on that fill |
-| White on success chip `#388e3c` | ≈4.1:1 | 4.5:1 at chip label size |
+| Focus ring `shadow.focusRing` | `rgba(30,136,229,0.35)` → 1.53:1 on white, 1.49:1 on the input fill | solid 2px `button.primaryDefault` → 3.32–3.68:1 light, 4.04–5.03:1 dark ✅ |
+| Contained primary button | white on `button.primaryDefault` `#1E88E5` → 3.68:1 | white on **`button.primaryFill`** `#1976d2` → 4.60:1 ✅ |
+| Filled warning chip | white on `#f57c00` → 2.70:1 | `text.primary` on `#f57c00` → 6.84:1 ✅ |
+| Filled success chip | white on `status.complete` `#388e3c` → 4.12:1 | white on **`status.completeChip`** `#2e7d32` → 5.13:1 ✅ |
+| **Outlined** warning chip (the HIGH priority chip) | `#f57c00` label → 2.70:1 | `warning[800]` `#bf360c` light → 5.09–5.60:1; `warning[300]` dark → 9.39–10.86:1 ✅ |
+| `MuiLink` | pinned `#1976d2` in both modes → 3.61:1 on the dark card, and only 4.18:1 on the light page background / 4.39:1 on a hovered row | mode-aware: `button.primaryHover` light → 5.22–5.75:1, `primary[300]` dark → 10.85–13.27:1 ✅ |
+| DataGrid cell / header focus | `outline: none`, no replacement — keyboard navigation invisible | 2px solid `button.primaryDefault` ring, offset −2 → 3.51:1+ light, 3.90:1+ dark ✅ |
+| Tag rotation `tagPalette[3]` (orange) | `#E65100` on `#FFF3E0` → 3.46:1 | `#BF360C` on `#FFF3E0` → 5.11:1 ✅ |
+| §2 `TO DO` chip **example in this document** | prescribed white on `#00acc1` → 2.74:1, and every page that copied it inherited the failure | example now specifies `text.primary` → 6.75:1 ✅ |
+
+**Two rules that follow from the above, and are the ones to actually remember:**
+
+- The blue accent has **three** jobs, and they are not interchangeable. `button.primaryDefault` (`#1E88E5`) is **non-text only** — rings, borders, tab indicator, control fills, where 3:1 is the bar. `button.primaryFill` (`#1976d2`) is the **fill** behind white text — contained primary buttons, `palette.primary.main`. `button.primaryHover` (`#1565C0`) is the **foreground** tone — link text, text/outlined button labels, selected tabs, focused field labels — with a light `primary[300]`-class tone standing in for it in dark mode. The theme already routes all three; don't reach past them.
+- **Pick a foreground tone that passes on the page background and on a hovered row, not just on paper.** `#1976d2` is 4.60:1 on `paper` but 4.18:1 on `background.default` and 4.39:1 on a hovered `primary[50]` row — and in-row links, chart-legend links and toolbar text buttons all live on those surfaces. A tone that only passes on paper is a latent failure that reappears on hover, which is exactly what a one-off audit won't catch twice.
+- A **fill's** contrast requirement depends on the label sitting on it, and a light-to-mid fill (`status.todo`, `status.review`) needs a **dark** label. Measure the pair; don't default to `#fff`.
 
 Full accessibility auditing is handled by the **ui-ux-reviewer** agent ([`.claude/agents/ui-ux-reviewer.md`](.claude/agents/ui-ux-reviewer.md)) — it audits these WCAG items (plus mobile targets) against every built page.
 
@@ -143,6 +156,47 @@ Full accessibility auditing is handled by the **ui-ux-reviewer** agent ([`.claud
 
 Row hover and selected states are theme-wired; leave them alone.
 
+**Composition — one section, not three.** Everything above lives inside a *single*
+card: heading and primary action in the header, then the toolbar row, then the
+active-filter chip row, then the rows. Do **not** split the toolbar and the grid
+into separate `<Paper>` blocks, and do not leave the toolbar or grid with no
+container at all.
+
+**Grid height: `autoHeight`, never a fixed pixel height.** The grid grows with
+its rows so the page scrolls as one document, rather than nesting a scroll area
+inside an already-scrolling page. One catch, already handled centrally: MUI
+collapses DataGrid *overlays* to 0px under `autoHeight`, which silently hides the
+loading skeleton and every empty state rendered via `slots.noRowsOverlay`. The
+theme's `MuiDataGrid` override reserves `--DataGrid-overlayHeight`, so don't set
+it per page — and don't "fix" a blank-looking overlay by pinning a height.
+
+**Use `<ListPageShell>`** from [`src/components/ListPageShell.tsx`](src/components/ListPageShell.tsx),
+which wraps Refine's `<List>` from `@refinedev/mui` and owns the page padding,
+the H1, the create button, the toolbar row and the chip-row spacing. Pass the
+search/filter controls as `toolbar` and the grid as `children`:
+
+```tsx
+<ListPageShell
+  title="Contacts"
+  createLabel="New contact"
+  toolbar={<>{searchField}{statusFilter}{companyFilter}</>}
+  activeFilters={activeChips}      // omit/null when no filter is set
+>
+  {gridOrEmptyState}
+</ListPageShell>
+```
+
+Don't wrap the toolbar controls in your own `<Stack>` or `<Paper>` — the shell
+supplies the row layout so every list wraps identically at every breakpoint.
+
+> **Why this is spelled out**: an earlier version of this section listed the
+> required *elements* but never said what contained them, while §4.2 did say to
+> use Refine's `<Show>`. Three list pages built in parallel against that text
+> produced three different compositions — a Refine `<List>` card, two detached
+> `<Paper>` blocks, and a bare toolbar above a fixed-height grid. Every one
+> satisfied the checklist below; none matched the others. A checklist constrains
+> content, not layout.
+
 **Toolbar** — search `<TextField size="small">` with `SearchRoundedIcon` start adornment (`aria-hidden`) + clear `<IconButton aria-label="Clear search">`; filters `<Button variant="outlined" startIcon={<FilterListRoundedIcon />}>`; active chip `<Chip variant="outlined" color="primary" onDelete>`; "Clear all" as `<Button size="small" variant="text">`. Don't override the theme's 16px input font.
 
 **Implementation — defer to the skill.** This file owns the visual contract. Refine wiring (`useDataGrid` vs `useList`, server-side `filters[]`, `meta.search`, pagination, `noRowsOverlay`) lives in [`taruvi-refine-providers`](.agents/skills/taruvi-refine-providers/SKILL.md).
@@ -172,7 +226,9 @@ Single-column by default; two columns only for genuinely paired inputs (Start/En
 
 **Vertical rhythm** (`taruviTokens.spacing.*`): label→input 8 · input→helper 4 · field↔field 16 · section↔section 32 · actions mt 24 · Cancel↔Save gap 10.
 
-**Section title** — Quicksand 600 13px UPPERCASE 0.05em, `color: 'text.secondary'`, `component="h3"` so it lands in the heading outline, `mt: 4, mb: 1.75`.
+**Section title** — Quicksand 600 13px UPPERCASE 0.05em, `color: 'text.secondary'`, **`component="h2"`** so it lands in the heading outline, `mt: 4, mb: 1.75`.
+
+> **Why `h2` and not `h3`.** A form page's only other heading is its `<h1>` page title — Refine's `<Create>` / `<Edit>` card contributes none — so the section titles are peers sitting *directly* under that `<h1>`. They all belong at the same level, and that level is `h2`; an `h3` here skips a level, which §3 forbids. Reach for `h3` only when there is a genuine intervening `h2` above it (a subsection inside an already-`h2`-titled section). This clause used to say `h3`, and every resource that followed it shipped an `h1 → h3` skip.
 
 **Two-column row** — `<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>` (stacks on mobile).
 
@@ -271,16 +327,59 @@ Skeletons are invisible to screen readers — put `aria-busy="true"` on the cont
 | Column type | Align | Format / behavior |
 |---|---|---|
 | **Text** | Left | Ellipsis + `<Tooltip>` with full value |
-| **Number / Currency / Percentage** | **Right** | `$5,000,000` · `87%` · `1,234` |
+| **Number / Currency / Percentage** | Left | `$5,000,000` · `87%` · `1,234` |
 | **Date** | Left | `MMM DD, YYYY` — never raw ISO, never two formats in one table |
 | **Status** | Left | `<Chip>` from §2 — never a colored dot or bare text |
 | **Selection** | **Left** edge | First column, fixed narrow |
 | **Actions** | **Right** edge | Last column, fixed narrow |
 | **Avatar + name** | Left | 30px avatar + name on one line; link to the show page rather than a row click |
 
+**List rows are left-aligned horizontally and centered vertically.** Values hug
+the leading edge of their column, headers sit on the same edge as the values
+under them, and everything — text, chips, multi-element cells — sits in the
+middle of the row height. Don't set `align`/`headerAlign` per column to achieve
+this; it's the default. Set them only to deviate: the actions column at the
+trailing edge, selection at the leading edge.
+
+**How the vertical centering works, and the one thing it costs you.** DataGrid v7
+makes `.MuiDataGrid-cell` a flex *item* of the row, not a flex container. The
+theme's `cell` slot adds `display: flex; align-items: center; line-height:
+inherit` to every cell — the same thing MUI's own `column.display: "flex"` does,
+applied once instead of per column — which is what centers a cell's contents
+vertically, **including block-level children**: several `renderCell`s return a
+`<Stack>`, which would otherwise sit at the top of the row. Horizontal alignment
+is left entirely to v7's own `justify-content` on
+`cell--textLeft/Center/Right`, so left is the default and `align: "center"` or
+`"right"` still work per column.
+
+Cells carry **horizontal padding only** (`0 16px`, matching `MuiTableCell`). v7
+centers inline content with `line-height: calc(var(--height) - 1px)`, so vertical
+padding on a cell pushes its text *down* rather than centering it — a 12px top
+padding put every row's text ~11px low before this was fixed.
+
+The cost of flex cells: a cell no longer lends its own `text-overflow: ellipsis`
+to a bare string child. **Any column whose text can outgrow its width must
+ellipsize in its own element** — wrap it in `<Box component="span" sx={{
+overflow: "hidden", textOverflow: "ellipsis" }}>` or use `<Typography noWrap>`.
+Fixed-width short values (dates, counts, chips) need nothing. Without a wrapper,
+long text hard-clips at the cell edge with no ellipsis.
+
+> **Judgment** — left-aligned text is the convention because a common leading
+> edge is what makes a column scannable: the eye tracks one vertical line instead
+> of re-finding each value's start. Centering was tried here and reverted for
+> exactly that reason — with ragged-length values (subjects, emails) every row
+> starts somewhere different, and ellipsized text starts at a different offset on
+> every row. If you have several numeric columns meant for magnitude comparison,
+> right-aligning those is a defensible deviation — but apply it to that whole
+> table, not one column in isolation.
+
 ```tsx
 const columns: GridColDef[] = [
-  { field: "name", flex: 1.2, renderCell: (p) => <Tooltip title={p.value}><span>{p.value}</span></Tooltip> },
+  // A flexible text column truncates in its own element — see the note above
+  { field: "name", flex: 1.2, renderCell: (p) => (
+    <Tooltip title={p.value}>
+      <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis" }}>{p.value}</Box>
+    </Tooltip>) },
   { field: "due", width: 140, valueFormatter: (v) => v ? format(new Date(v), "MMM dd, yyyy") : "—" },
   { field: "amount", width: 140, align: "right", headerAlign: "right",
     valueFormatter: (v) => v != null ? `$${v.toLocaleString()}` : "—" },
@@ -426,8 +525,10 @@ A chart is a complex image and color-coded data, so:
 
 - Wrap it in `role="img"` with an `aria-label` stating the takeaway, not the chart type — "Ticket status, Q2 2026: 42% resolved, 31% in progress".
 - Provide the underlying data as a `<table>` below the chart (collapsible via an Accordion) or a `<figcaption>` summary. This is the accessible alternative, and it's usually what users wanted anyway.
-- Distinguish series by a second channel besides color — direct labels, dash patterns, distinct markers. A legend that only maps color to name fails for color-blind users.
-- Keep adjacent series colors at 3:1 against each other and the background.
+- Distinguish series by a second channel besides color — direct labels, dash patterns, texture/pattern fills, distinct marker shapes. A legend that only maps color to name fails for color-blind users. Repeat the second channel **in the legend swatch**, or the mapping doesn't close.
+- Keep each series at **3:1 against the background**. Do **not** try to hold 3:1 between every pair of series fills — WCAG contrast is luminance-only, so forcing that across 5+ categorical series forces a light-to-dark luminance ramp, which is by definition a *sequential* palette and destroys the hue coding that makes a categorical chart readable. It is unsatisfiable rather than merely difficult: no choice of hues fixes it. Separate series with the non-color channel above instead, and pick the texture/overlay tone for contrast against its own fill.
+
+> **Judgment** — don't "fix" a categorical palette by nudging hues toward each other's families either. Hue-aligning two statuses to match their chip tones can *lower* the pair's ratio and simultaneously put them in the one hue family a deuteranope can least separate — worse on both counts. Measure before swapping.
 - Never put data in a hover tooltip that exists nowhere else; tooltips are unreachable on touch.
 
 ---
