@@ -63,6 +63,7 @@ Fan out at the **resource** boundary, never the **layer** boundary.
   use `*Rounded` icons.
 - **Taruvi:** read `.agents/skills/taruvi-app-developer/SKILL.md` (backend) or
   `.agents/skills/taruvi-refine-providers/SKILL.md` (frontend) first — never
-  implement Taruvi work from memory. Missing? Run `npx -y skills experimental_install`.
+  implement Taruvi work from memory. Missing? Run
+  `npx skills add Taruvi-ai/taruvi-skills` (they install on `npm install`).
 
 Do not run `npm run dev`/`build` — the dev server is already running.

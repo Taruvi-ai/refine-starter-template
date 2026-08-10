@@ -26,8 +26,9 @@ the relevant skill before writing code** — do not implement from memory:
   control): `.agents/skills/taruvi-refine-providers/SKILL.md`
 
 Each SKILL.md routes you to its module references. If the skills are missing,
-install them: `npx -y skills update` (or `npx skills add Taruvi-ai/taruvi-skills`).
-They also install automatically via `postinstall` on `npm install`.
+install them: `npx skills add Taruvi-ai/taruvi-skills`. They install automatically
+(latest) via `postinstall` on every `npm install`, so they are not committed to
+the repo — a bare clone without installing won't have them.
 
 The skills are the source of truth for **Refine v5 syntax**, provider `meta`
 options, hook return shapes, and production UX patterns. Don't duplicate that here

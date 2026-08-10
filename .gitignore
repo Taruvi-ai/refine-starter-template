@@ -32,6 +32,13 @@ _.sln
 .env
 .env.local
 
+# Taruvi skills — fetched latest on every `npm install` (postinstall), never
+# committed, so installs stay reproducible and the tree never drifts.
+# context7-mcp and the .kiro/skills symlink are NOT Taruvi skills — they stay tracked.
+.agents/skills/
+.codex/skills/taruvi-*
+skills-lock.json
+
 # Auth secrets
 auth.json
 .codex/auth.json

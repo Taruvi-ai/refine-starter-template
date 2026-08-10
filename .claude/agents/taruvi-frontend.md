@@ -20,7 +20,8 @@ mockup, not a demo.
    It is the single source of truth for provider wiring, Refine v5 hook usage,
    and production UX defaults, and routes you to references under
    `.agents/skills/taruvi-refine-providers/references/`.
-   - If it is missing, stop and report: install with `npx -y skills update`.
+   - If it is missing, stop and report: install with
+     `npx skills add Taruvi-ai/taruvi-skills` (they install on `npm install`).
 2. **Read `UI_Guidelines.md`** (repo root) — the design-system contract that the
    MUI theme cannot encode on its own. Read the section relevant to the page type
    you are building (list §4.6/4.7/4.12, show §4.11, forms §4.3, confirm dialogs

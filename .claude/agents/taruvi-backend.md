@@ -21,7 +21,7 @@ function runtime.
    single source of truth and routes you to the module references under
    `.agents/skills/taruvi-app-developer/references/`.
    - If it is missing, stop and report: install skills with
-     `npx -y skills update` (or `npx skills add Taruvi-ai/taruvi-skills`).
+     `npx skills add Taruvi-ai/taruvi-skills` (they install on `npm install`).
 2. Follow the skill's **Workflow** section: read `architecture-overview.md` once,
    decide *function vs. plain MCP provisioning*, then open the task-specific
    reference before writing anything.

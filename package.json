@@ -59,7 +59,7 @@
     "refine": "refine",
     "setup": "node setup-env.js",
     "deploy": "node scripts/deploy.mjs",
-    "postinstall": "npx -y skills experimental_install -y || echo \"[skills] restore skipped (offline or CLI unavailable) — committed .agents/skills still apply\""
+    "postinstall": "npx -y skills add Taruvi-ai/taruvi-skills --skill '*' --agent claude-code codex kiro-cli -y || echo \"[skills] fetch skipped (offline or CLI unavailable) — run 'npx skills add Taruvi-ai/taruvi-skills' manually\""
   },
   "browserslist": {
     "production": [

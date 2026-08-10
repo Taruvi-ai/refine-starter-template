@@ -44,7 +44,9 @@ Create your app and collect these values in the Taruvi Console first.
 - **Design system:** [`UI_Guidelines.md`](UI_Guidelines.md) + `taruviTokens` from
   [`themeOptions.ts`](themeOptions.ts).
 
-Skills live in `.agents/skills/`. Refresh them anytime with `npx -y skills update`.
+Skills are fetched fresh (latest) into `.agents/skills/` on every `npm install`, so
+they are not committed. Install/refresh manually with
+`npx skills add Taruvi-ai/taruvi-skills`.
 
 ## Commands
 
