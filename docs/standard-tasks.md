@@ -15,11 +15,12 @@ or maintaining an internal app, apply the ones that aren't present yet.
 Adds a **Report an issue** item to the Navkit avatar dropdown that opens the
 Taruvi helpdesk in a new tab so users can file a support ticket.
 
-**Template baseline:** the base template currently wires `<Navkit client=… getTheme=… />`
-**without** `profileMenuItems`, and has no `src/navkit/useNavkitProfileMenuItems.tsx`.
-So this prompt **creates** that file and adds the `profileMenuItems` prop to
-`src/App.tsx` (step 4's "do not change App.tsx" applies only once the wiring
-already exists). Bake it into the template and every new app inherits it.
+**Template baseline:** the standard template **ships this active** —
+`src/navkit/useNavkitProfileMenuItems.tsx` returns the Report an issue item and
+it's wired into `<Navkit profileMenuItems={…} />` in `src/App.tsx`. New apps
+inherit it, so this prompt is a **retrofit** for apps forked before that (where
+it creates the hook and adds the prop; step 4's "do not change App.tsx" applies
+only once the wiring exists).
 
 ### Goal
 
