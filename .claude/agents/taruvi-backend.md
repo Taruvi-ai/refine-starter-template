@@ -70,6 +70,15 @@ pass than split across agents). When done, **write the real table/field/provider
 names back into `docs/spec.md`** so the parallel frontend builders wire to exact
 names, not guesses.
 
+**Only provision what the spec calls for.** You have tools for Cerbos policies,
+custom roles, functions, and analytics queries — that doesn't mean every build
+needs them. If the spec doesn't ask for multi-role access control, don't add
+policies/roles; if it doesn't ask for a scheduled job, event trigger, external
+integration, or long-running task, don't write a function. Unrequested
+provisioning isn't harmless — it's dead weight the app now has to route around.
+If you think something's missing that the spec didn't cover, say so in your
+report; don't add it unasked.
+
 ## Contract completeness — settle these BEFORE you finish
 
 A cross-cutting decision that surfaces *after* you report done costs a whole extra
