@@ -1,0 +1,60 @@
+name: UI/UX Review
+
+# Automated design-system + accessibility review on every PR that touches
+# frontend pages/components. Informational only — posts a PR comment, never
+# blocks merge. Criteria live in .claude/agents/ui-ux-reviewer.md and
+# UI_Guidelines.md (single source of truth — this workflow reads them rather
+# than duplicating the checklist).
+#
+# Prerequisite: add an ANTHROPIC_API_KEY (or CLAUDE_CODE_OAUTH_TOKEN) repo
+# secret before this will run. See docs/standard-tasks.md if that's missing.
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - "src/pages/**"
+      - "src/components/**"
+      - "UI_Guidelines.md"
+      - "themeOptions.ts"
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: UI/UX review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: "--max-turns 6 --model claude-sonnet-5"
+          prompt: |
+            You are acting as the ui-ux-reviewer agent defined in
+            .claude/agents/ui-ux-reviewer.md — read that file and
+            UI_Guidelines.md and follow their review checklist exactly.
+
+            Scope: only the page/component files changed in this pull
+            request. Find them with:
+              git diff --name-only origin/${{ github.base_ref }}...HEAD
+            restricted to paths under src/pages/ and src/components/.
+            Ignore everything else, including files this PR didn't touch.
+
+            This run is informational only:
+            - Do NOT edit any files.
+            - Do NOT request changes or fail the build.
+            - When done, post your findings as a single PR comment:
+                gh pr comment ${{ github.event.pull_request.number }} --body "<findings>"
+              Use the finding format from ui-ux-reviewer.md (severity,
+              file:line, rule, fix) and end with the ship / needs-fixes
+              verdict line.
+            - If none of the changed files fall under src/pages/ or
+              src/components/, post a short comment saying there's nothing
+              in scope and stop.

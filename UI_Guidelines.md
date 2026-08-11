@@ -125,7 +125,7 @@ Every page satisfies these. They're the WCAG items MUI does *not* give you free.
 - **Pick a foreground tone that passes on the page background and on a hovered row, not just on paper.** `#1976d2` is 4.60:1 on `paper` but 4.18:1 on `background.default` and 4.39:1 on a hovered `primary[50]` row — and in-row links, chart-legend links and toolbar text buttons all live on those surfaces. A tone that only passes on paper is a latent failure that reappears on hover, which is exactly what a one-off audit won't catch twice.
 - A **fill's** contrast requirement depends on the label sitting on it, and a light-to-mid fill (`status.todo`, `status.review`) needs a **dark** label. Measure the pair; don't default to `#fff`.
 
-Full accessibility auditing is handled by the **ui-ux-reviewer** agent ([`.claude/agents/ui-ux-reviewer.md`](.claude/agents/ui-ux-reviewer.md)) — offered after a build, not run automatically; ask for it to audit these WCAG items (plus mobile targets) against the built pages.
+Full accessibility auditing is handled by the **ui-ux-reviewer** agent ([`.claude/agents/ui-ux-reviewer.md`](.claude/agents/ui-ux-reviewer.md)) — it runs automatically as a GitHub Action ([`.github/workflows/ui-ux-review.yml`](.github/workflows/ui-ux-review.yml)) on every PR touching `src/pages/**` or `src/components/**`, posting these WCAG items (plus mobile targets) as a PR comment. Informational only, never blocks merge.
 
 ---
 
@@ -552,7 +552,7 @@ A chart is a complex image and color-coded data, so:
 | Sidebar geometry | [src/components/sidenav/MuiSidenav.tsx](src/components/sidenav/MuiSidenav.tsx) |
 | Brand cover (Home) | [src/pages/home/index.tsx](src/pages/home/index.tsx) |
 | Refine wiring for lists | `.agents/skills/taruvi-refine-providers/SKILL.md` |
-| Accessibility audit | **ui-ux-reviewer** subagent · `.claude/agents/ui-ux-reviewer.md` |
+| Accessibility audit | **ui-ux-reviewer** · `.claude/agents/ui-ux-reviewer.md` · runs via `.github/workflows/ui-ux-review.yml` on every PR |
 
 When you need a value the theme doesn't surface, import `taruviTokens` rather than hardcoding hex — it keeps the design system traceable.
 

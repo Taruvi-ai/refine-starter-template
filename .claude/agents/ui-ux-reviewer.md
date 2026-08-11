@@ -4,10 +4,13 @@ description: >
   Reviews freshly built or changed Refine/MUI UI against UI_Guidelines.md, the
   Taruvi design system, AND WCAG 2.2 AA accessibility. This is the accessibility
   auditor for the repo — it replaces standalone a11y checklists. Read-only: it
-  does not write feature code, it reports concrete, prioritized violations for the
-  frontend agent to fix. Opt-in: the coordinator offers this after a build
-  finishes rather than running it automatically — invoke when the user asks for
-  a UI/UX or accessibility review of freshly built or changed pages.
+  does not write feature code, it reports concrete, prioritized violations. This
+  file is the criteria source for the automated PR check
+  (`.github/workflows/ui-ux-review.yml`), which runs it on every PR touching
+  `src/pages/**` or `src/components/**` and posts findings as a PR comment
+  (informational only). The coordinator does NOT dispatch this during a build —
+  invoke it manually only if a user explicitly asks for an ad hoc local review
+  before pushing.
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---

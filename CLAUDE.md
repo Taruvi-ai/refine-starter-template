@@ -15,7 +15,7 @@ from **planning once, then fanning out across independent resources.**
 |---|---|---|
 | **`taruvi-backend`** | schema, policies, roles, Python functions, SQL | `taruvi-app-developer` skill |
 | **`taruvi-frontend`** | Refine/MUI pages, providers, hooks, dashboards, forms | `taruvi-refine-providers` skill + `UI_Guidelines.md` |
-| **`ui-ux-reviewer`** | audit built UI vs. design system + WCAG | `UI_Guidelines.md` + theme |
+| **`ui-ux-reviewer`** | audit built UI vs. design system + WCAG — runs via CI, not the coordinator (see step 5) | `UI_Guidelines.md` + theme |
 
 ## The flow
 
@@ -69,15 +69,16 @@ own `src/pages/{resource}/` dir and returns its Refine `resources` entry —
 **you** (the coordinator) then register them all in `src/App.tsx` in one edit,
 so the parallel builders never collide on that shared file.
 
-**5. Offer review — don't run it automatically.**
-Once the pages land and are registered, tell the user the build is done and ask
-if they want a UI/UX + accessibility review. Only dispatch `ui-ux-reviewer` if
-they say yes. It isn't part of the default build loop: since §3/§4.5/§4.6 of
-`UI_Guidelines.md` treat a lot of the polish it checks as judgment calls, not
-requirements, running it unasked would auto-flag things the user may not want —
-and every finding tends to trigger a fix round, which is real time (see the
-post-mortem: review itself is cheap, the *fix rounds* it spawns aren't). If they
-do want it, feed findings back to the relevant `taruvi-frontend` to fix.
+**5. Don't run review yourself — it happens in CI.**
+Review is **not** a coordinator step anymore. `.github/workflows/ui-ux-review.yml`
+runs `ui-ux-reviewer`'s checklist automatically on every PR that touches
+`src/pages/**` or `src/components/**`, and posts findings as a PR comment —
+informational only, it never blocks merge. So: don't dispatch `ui-ux-reviewer`
+as part of a build, and don't ask the user if they want one. If a PR isn't open
+yet, there's nothing to review; the check runs once they push and open the PR.
+(`ui-ux-reviewer.md` still exists as the criteria source the workflow reads —
+you can also dispatch it manually if a user explicitly asks for an ad hoc local
+review before pushing.)
 
 **6. Relay** a concise summary to the user — subagent reports aren't shown to them.
 
