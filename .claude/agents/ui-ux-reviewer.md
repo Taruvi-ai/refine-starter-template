@@ -5,7 +5,9 @@ description: >
   Taruvi design system, AND WCAG 2.2 AA accessibility. This is the accessibility
   auditor for the repo — it replaces standalone a11y checklists. Read-only: it
   does not write feature code, it reports concrete, prioritized violations for the
-  frontend agent to fix. Invoke after any UI is built or restyled.
+  frontend agent to fix. Opt-in: the coordinator offers this after a build
+  finishes rather than running it automatically — invoke when the user asks for
+  a UI/UX or accessibility review of freshly built or changed pages.
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---

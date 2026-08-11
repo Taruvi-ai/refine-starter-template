@@ -125,7 +125,7 @@ Every page satisfies these. They're the WCAG items MUI does *not* give you free.
 - **Pick a foreground tone that passes on the page background and on a hovered row, not just on paper.** `#1976d2` is 4.60:1 on `paper` but 4.18:1 on `background.default` and 4.39:1 on a hovered `primary[50]` row — and in-row links, chart-legend links and toolbar text buttons all live on those surfaces. A tone that only passes on paper is a latent failure that reappears on hover, which is exactly what a one-off audit won't catch twice.
 - A **fill's** contrast requirement depends on the label sitting on it, and a light-to-mid fill (`status.todo`, `status.review`) needs a **dark** label. Measure the pair; don't default to `#fff`.
 
-Full accessibility auditing is handled by the **ui-ux-reviewer** agent ([`.claude/agents/ui-ux-reviewer.md`](.claude/agents/ui-ux-reviewer.md)) — it audits these WCAG items (plus mobile targets) against every built page.
+Full accessibility auditing is handled by the **ui-ux-reviewer** agent ([`.claude/agents/ui-ux-reviewer.md`](.claude/agents/ui-ux-reviewer.md)) — offered after a build, not run automatically; ask for it to audit these WCAG items (plus mobile targets) against the built pages.
 
 ---
 

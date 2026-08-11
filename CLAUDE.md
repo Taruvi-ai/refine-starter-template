@@ -42,10 +42,15 @@ own `src/pages/{resource}/` dir and returns its Refine `resources` entry —
 **you** (the coordinator) then register them all in `src/App.tsx` in one edit,
 so the parallel builders never collide on that shared file.
 
-**4. Batch review.**
-After the pages land, dispatch `ui-ux-reviewer` over the changed pages; feed its
-findings back to the relevant `taruvi-frontend` to fix. Run this while you scope
-the next feature — don't block on it.
+**4. Offer review — don't run it automatically.**
+Once the pages land and are registered, tell the user the build is done and ask
+if they want a UI/UX + accessibility review. Only dispatch `ui-ux-reviewer` if
+they say yes. It isn't part of the default build loop: since §3/§4.5/§4.6 of
+`UI_Guidelines.md` treat a lot of the polish it checks as judgment calls, not
+requirements, running it unasked would auto-flag things the user may not want —
+and every finding tends to trigger a fix round, which is real time (see the
+post-mortem: review itself is cheap, the *fix rounds* it spawns aren't). If they
+do want it, feed findings back to the relevant `taruvi-frontend` to fix.
 
 **5. Relay** a concise summary to the user — subagent reports aren't shown to them.
 
