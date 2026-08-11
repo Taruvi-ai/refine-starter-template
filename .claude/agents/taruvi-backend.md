@@ -79,6 +79,28 @@ provisioning isn't harmless — it's dead weight the app now has to route around
 If you think something's missing that the spec didn't cover, say so in your
 report; don't add it unasked.
 
+## Known platform gotchas (stopgap — not yet documented in the skill)
+
+These aren't in `.agents/skills/taruvi-app-developer/` (verified — grepped the
+whole skill, not there) but are confirmed from a real build. Vendored skills are
+regenerated on every `npm install`, so this file is the durable place to record
+them until they land upstream in `Taruvi-ai/taruvi-skills`.
+
+- **Cerbos policy `roles[]` needs the role's bare `name`, not its `slug`.**
+  Cerbos evaluates a principal's role against the bare name Taruvi
+  auto-generates when you `manage_roles(action="create", name="Admin")` — e.g.
+  `Admin` — **not** the app-scoped slug (`hrapp-admin`) that same call returns.
+  This contradicts the skill's own general guidance to "use the slug... for
+  subsequent operations" (`mcp-tool-quickref.md`) — that convention does not
+  hold for Cerbos `roles[]` specifically. Using only the slug silently denies
+  **every** request for **every** role — it doesn't error, it just 403s
+  everything, which looks like a totally different bug.
+  **Do this up front:** for any custom role referenced in a Cerbos policy,
+  list **both** forms in every rule's `roles[]` from the start —
+  `["hrapp-admin", "Admin"]` — don't wait to discover this via live QA.
+  (Whether the slug form does anything at all, or is inert next to the bare
+  name, is still unconfirmed — including it is the safe default either way.)
+
 ## Contract completeness — settle these BEFORE you finish
 
 A cross-cutting decision that surfaces *after* you report done costs a whole extra
@@ -106,6 +128,13 @@ to trip over it.
 - **Verify** by re-reading the resource (`get_datatable_schema`,
   `manage_policies(action="get")`, …) and executing any function / analytics
   query end-to-end before reporting back.
+- **For Cerbos policies involving custom roles, re-reading the policy body is
+  not enough.** A policy with the wrong role identifier round-trips through
+  `get` perfectly fine — it's syntactically valid, it just denies everyone at
+  evaluation time. If you created custom roles and QA users exist (or you can
+  create one), make one real authenticated request per role against the
+  policy you just wrote and confirm it allows/denies as intended before
+  reporting done — don't rely on the stored JSON looking correct.
 - Update `docs/spec.md` and report to the coordinator as structured data: what
   resources/tables/policies now exist, their exact names, key fields, and any
   provider `meta` the frontend needs (dataProviderName, bucketName, function
