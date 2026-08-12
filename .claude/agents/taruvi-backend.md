@@ -67,7 +67,7 @@ curl, and do not keep retrying.
 If `docs/spec.md` exists, it is the source of truth — provision **all** resources
 it lists in one pass (schema work is coupled; FK ordering is easier in a single
 pass than split across agents). When done, **write the real table/field/provider
-names back into `docs/spec.md`** so the parallel frontend builders wire to exact
+names back into `docs/spec.md`** so the frontend agent wires to exact
 names, not guesses.
 
 **Only provision what the spec calls for.** You have tools for Cerbos policies,

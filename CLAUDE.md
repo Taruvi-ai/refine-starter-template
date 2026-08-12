@@ -6,10 +6,14 @@ Refine v5 + Taruvi specifics, deployment) — they apply to every agent/IDE.
 
 ## You are the coordinator
 
-For a real build, don't implement everything in one thread — but also don't force
-a rigid backend→frontend→review chain. That chain is a *dependency line*, not
-parallel work: it doesn't save wall-clock, it just adds handoffs. The speed comes
-from **planning once, then fanning out across independent resources.**
+For a real build, don't implement everything in one thread. Backend runs once.
+Frontend also runs once — as a **single agent building every resource
+sequentially**, not one agent per resource. Measured comparison: N parallel
+frontend agents each pay their preflight (skill + spec) separately — real,
+duplicated overhead — while one sequential agent pays it once and stays
+consistent across every page it builds (same enum→chip-color mapping, same
+patterns, no drift). Plan once so that one agent doesn't have to re-derive
+decisions as it moves resource to resource.
 
 | Specialist (`.claude/agents/`) | Owns | Loads |
 |---|---|---|
@@ -30,8 +34,9 @@ layout, naming) — that's surveying, not clarifying.
 
 **2. Plan once — write the spec yourself (main session).**
 Before delegating, produce a short spec and save it to `docs/spec.md`. It is the
-**single source of truth** every subagent reads, so parallel builders don't drift.
-It lists: each resource, its fields/types/relations, provider `meta` (which
+**single source of truth** every subagent reads, so backend and frontend agree
+on exact names instead of guessing at each other. It lists: each resource, its
+fields/types/relations, provider `meta` (which
 `dataProviderName`, `bucketName`, function slugs), and the page list per resource
 (list / show / create-edit / dashboard). This step is what prevents rework —
 don't skip it.
@@ -60,14 +65,12 @@ Cerbos in a single pass (schema work is coupled; splitting it causes FK-ordering
 pain). It writes the **real table/field/provider names back into `docs/spec.md`**
 and reports them.
 
-**4. Frontend fan-out — this is where time is saved.**
-Once the schema exists, dispatch `taruvi-frontend` **in parallel, one per
-resource** (or per independent page group), each reading `docs/spec.md` +
-the real names from step 3. N resources build concurrently instead of serially.
-Send them in a single message so they run at once. Each builder writes only its
-own `src/pages/{resource}/` dir and returns its Refine `resources` entry —
-**you** (the coordinator) then register them all in `src/App.tsx` in one edit,
-so the parallel builders never collide on that shared file.
+**4. Frontend — one agent, sequentially, the whole thing.**
+Once the schema exists, dispatch **one** `taruvi-frontend` for the entire
+frontend — every resource's list/show/create-edit pages plus the dashboard —
+in a single continuous session, reading `docs/spec.md` + the real names from
+step 3. It registers resources in `src/App.tsx` directly as it goes; there's no
+parallel-builder collision to avoid, so no separate batching-at-the-end step.
 
 **5. Don't run review yourself — it happens in CI.**
 Review is **not** a coordinator step anymore. `.github/workflows/ui-ux-review.yml`
@@ -85,9 +88,9 @@ review before pushing.)
 ### When NOT to orchestrate
 
 For a small, single-layer change (tweak one page, add one column, fix one policy)
-just do it directly, or dispatch the one relevant specialist. The spec + fan-out
-model is for features that span multiple resources or the full schema→UI arc.
-Fan out at the **resource** boundary, never the **layer** boundary.
+just do it directly, or dispatch the one relevant specialist. The spec + backend/
+frontend split is for features that span the full schema→UI arc — not every
+small change needs both agents dispatched.
 
 ## Two preflights are mandatory (the subagents enforce them)
 
