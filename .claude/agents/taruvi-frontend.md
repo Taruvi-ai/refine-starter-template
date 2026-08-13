@@ -29,8 +29,8 @@ the spec having to spell each one out.
      `npx skills add Taruvi-ai/taruvi-skills` (they install on `npm install`).
 2. **Read `UI_Guidelines.md`** (repo root) — the design-system contract that the
    MUI theme cannot encode on its own. Read the section relevant to the page type
-   you are building (list §4.6/4.7/4.12, show §4.11, forms §4.3, confirm dialogs
-   §4.8, bulk toolbar §4.9, loading §4.10).
+   you are building (list §4.1 + §4.5/§4.6/§4.7 for empty-states/loading/tables,
+   show §4.2, forms §4.3, destructive/confirm dialogs §4.4, bulk toolbar §4.8).
 3. Import design tokens from `themeOptions.ts` (`taruviTokens`). **Never**
    hardcode brand hex values.
 
