@@ -33,16 +33,14 @@ Two kinds of things are already solved. Re-implementing either is the most commo
 | Tables + DataGrid | 8px wrapper, head 11px Quicksand 700 UPPERCASE, cells 13px 12×16, hover `primary-50`, selected = `primary-50` + 2px primary left border |
 | Everything else | Accordion (flat, 6px) · Alert (4px left border) · Tabs (3px indicator) · Sidebar active `#1976d2` · Tooltip `#121414` · Skeleton wave · Avatar 34×34 |
 
-**These behaviors already exist in the repo.** Wire them; don't build a second one.
+**One repo behavior belongs here** — the rest (notifications, unsaved-changes
+guard, URL-synced filters, server-side search, browser-error logs) are
+architecture/wiring facts, not design-system ones; they live in
+`taruvi-frontend.md` and `AGENTS.md` so they're stated once, not duplicated.
 
 | Behavior | Wire it through |
 |---|---|
-| Success / error feedback on any mutation | `useNotificationProvider` from `@refinedev/mui`, already configured in `src/App.tsx`. No custom snackbars or alternate toast providers. |
-| Unsaved-changes guard on navigation | [`UnsavedChangesDialog.tsx`](src/components/UnsavedChangesDialog.tsx) + Refine's `warnWhenUnsavedChanges`. Never `window.confirm`. |
-| Filters, sort, pagination surviving back-navigation | Refine `syncWithLocation` — state lives in the URL, not `useState`. |
-| Server-side search and filtering | Refine's `filters[]` / `meta.search`. Never `.filter()` over a fetched page. |
 | Page padding | A consistent page-padding wrapper applied once — don't hand-roll a `<Container>` per page. |
-| Browser errors while developing | Read `logs/frontend.ndjson` rather than asking the user to open DevTools. |
 
 ---
 

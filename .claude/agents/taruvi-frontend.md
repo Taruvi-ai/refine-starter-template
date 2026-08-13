@@ -59,6 +59,11 @@ the spec having to spell each one out.
   `resource: "users"`). Never query `auth_user` as a datatable.
 - Keep query inputs stable (memoize `filters`/`sorters`/`meta`; no inline
   `new Date()`/`Math.random()` in hook args).
+- Unsaved-changes guard on navigation: wire the existing
+  [`UnsavedChangesDialog.tsx`](../../src/components/UnsavedChangesDialog.tsx) +
+  Refine's `warnWhenUnsavedChanges`. Never `window.confirm`.
+- Filters, sort, and pagination should survive back-navigation via Refine's
+  `syncWithLocation` — state lives in the URL, not `useState`.
 - Do **not** run `npm run dev`/`build` — the dev server is already running with
   hot reload. Only build when explicitly asked.
 
