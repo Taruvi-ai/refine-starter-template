@@ -497,7 +497,8 @@ Required: nav wrapped in `<nav aria-label="Main">` with the active item `aria-cu
 ```tsx
 // taruviTokens.status — never hardcode these
 const chartColors = {
-  open: '#19b3e5', inProgress: '#1976d2', underReview: '#FF8C00', resolved: '#008751',
+  open: taruviTokens.status.open, inProgress: taruviTokens.status.inProgress,
+  underReview: taruviTokens.status.underReview, resolved: taruviTokens.status.resolved,
   delayed: taruviTokens.status.delayedAlt, onHold: taruviTokens.status.onHoldAlt,
   primary: taruviTokens.status.chartPrimary,
 };
@@ -511,9 +512,9 @@ A chart is a complex image and color-coded data, so:
 - Provide the underlying data as a `<table>` below the chart (collapsible via an Accordion) or a `<figcaption>` summary. This is the accessible alternative, and it's usually what users wanted anyway.
 - Distinguish series by a second channel besides color — direct labels, dash patterns, texture/pattern fills, distinct marker shapes. A legend that only maps color to name fails for color-blind users. Repeat the second channel **in the legend swatch**, or the mapping doesn't close.
 - Keep each series at **3:1 against the background**. Do **not** try to hold 3:1 between every pair of series fills — WCAG contrast is luminance-only, so forcing that across 5+ categorical series forces a light-to-dark luminance ramp, which is by definition a *sequential* palette and destroys the hue coding that makes a categorical chart readable. It is unsatisfiable rather than merely difficult: no choice of hues fixes it. Separate series with the non-color channel above instead, and pick the texture/overlay tone for contrast against its own fill.
+- Never put data in a hover tooltip that exists nowhere else; tooltips are unreachable on touch.
 
 > **Judgment** — don't "fix" a categorical palette by nudging hues toward each other's families either. Hue-aligning two statuses to match their chip tones can *lower* the pair's ratio and simultaneously put them in the one hue family a deuteranope can least separate — worse on both counts. Measure before swapping.
-- Never put data in a hover tooltip that exists nowhere else; tooltips are unreachable on touch.
 
 ---
 
