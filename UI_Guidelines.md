@@ -74,7 +74,7 @@ Intentional separation of *brand* tones, *operational status* tones, and *chart*
 | ON HOLD | `<Chip label="ON HOLD" sx={{ bgcolor: taruviTokens.status.onHold, color: '#fff' }} />` (white on `#7b1fa2` = 8.20:1) |
 | TO DO | `<Chip label="TO DO" sx={{ bgcolor: taruviTokens.status.todo, color: taruviTokens.text.primary }} />` — **dark** label: `#00acc1` is a light fill, and white on it is only 2.74:1 |
 
-> **Both `sx` chips carry a measured label color, not a reflexive `#fff`.** A mid-light fill needs a dark label. This example previously specified `color: '#fff'` on `#00acc1`; every page that copied it shipped a 2.74:1 chip. If you add a fill here, measure it — don't pattern-match the row above.
+> **Both `sx` chips carry a measured label color, not a reflexive `#fff`.** A mid-light fill needs a dark label. If you add a fill here, measure it — don't pattern-match the row above.
 
 **Priority** — outlined: `<Chip variant="outlined" color="error|warning|success" label="HIGH|MEDIUM|LOW" />`. The theme supplies the outlined label/border tone per color and per mode; don't set `color` or `borderColor` by hand.
 
@@ -178,14 +178,6 @@ search/filter controls as `toolbar` and the grid as `children`:
 Don't wrap the toolbar controls in your own `<Stack>` or `<Paper>` — the shell
 supplies the row layout so every list wraps identically at every breakpoint.
 
-> **Why this is spelled out**: an earlier version of this section listed the
-> required *elements* but never said what contained them, while §4.2 did say to
-> use Refine's `<Show>`. Three list pages built in parallel against that text
-> produced three different compositions — a Refine `<List>` card, two detached
-> `<Paper>` blocks, and a bare toolbar above a fixed-height grid. Every one
-> satisfied the checklist below; none matched the others. A checklist constrains
-> content, not layout.
-
 **Toolbar** — search `<TextField size="small">` with `SearchRoundedIcon` start adornment (`aria-hidden`) + clear `<IconButton aria-label="Clear search">`; filters `<Button variant="outlined" startIcon={<FilterListRoundedIcon />}>`; active chip `<Chip variant="outlined" color="primary" onDelete>`; "Clear all" as `<Button size="small" variant="text">`. Don't override the theme's 16px input font.
 
 **Implementation — defer to the skill.** This file owns the visual contract. Refine wiring (`useDataGrid` vs `useList`, server-side `filters[]`, `meta.search`, pagination, `noRowsOverlay`) lives in [`taruvi-refine-providers`](.agents/skills/taruvi-refine-providers/SKILL.md).
@@ -217,7 +209,7 @@ Single-column by default; two columns only for genuinely paired inputs (Start/En
 
 **Section title** — Quicksand 600 13px UPPERCASE 0.05em, `color: 'text.secondary'`, **`component="h2"`** so it lands in the heading outline, `mt: 4, mb: 1.75`.
 
-> **Why `h2` and not `h3`.** A form page's only other heading is its `<h1>` page title — Refine's `<Create>` / `<Edit>` card contributes none — so the section titles are peers sitting *directly* under that `<h1>`. They all belong at the same level, and that level is `h2`; an `h3` here skips a level, which §3 forbids. Reach for `h3` only when there is a genuine intervening `h2` above it (a subsection inside an already-`h2`-titled section). This clause used to say `h3`, and every resource that followed it shipped an `h1 → h3` skip.
+> **Why `h2` and not `h3`.** A form page's only other heading is its `<h1>` page title — Refine's `<Create>` / `<Edit>` card contributes none — so the section titles are peers sitting *directly* under that `<h1>`. They all belong at the same level, and that level is `h2`; an `h3` here skips a level, which §3 forbids. Reach for `h3` only when there is a genuine intervening `h2` above it (a subsection inside an already-`h2`-titled section).
 
 **Two-column row** — `<Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>` (stacks on mobile).
 
@@ -347,8 +339,7 @@ is left entirely to v7's own `justify-content` on
 
 Cells carry **horizontal padding only** (`0 16px`, matching `MuiTableCell`). v7
 centers inline content with `line-height: calc(var(--height) - 1px)`, so vertical
-padding on a cell pushes its text *down* rather than centering it — a 12px top
-padding put every row's text ~11px low before this was fixed.
+padding on a cell pushes its text *down* rather than centering it.
 
 The cost of flex cells: a cell no longer lends its own `text-overflow: ellipsis`
 to a bare string child. **Any column whose text can outgrow its width must
@@ -457,7 +448,7 @@ Every create, update, and delete follows the same arc: **acknowledge → in-flig
 - Every mutation confirms visibly — notification, inline state change, or a redirect readable as success. Silent success is a defect.
 - Failures say what happened and what to do next. Never a raw error code, stack trace, or HTTP status to an end user.
 
-Feedback goes through `useNotificationProvider` (§1). Confirmation copy states the outcome, not the mechanism: "Invoice sent to 3 recipients", not "Mutation successful".
+Feedback goes through `useNotificationProvider`. Confirmation copy states the outcome, not the mechanism: "Invoice sent to 3 recipients", not "Mutation successful".
 
 > **Judgment** — optimistic UI suits high-success, low-stakes mutations (toggle, reorder, like) with rollback on failure. Long user-initiated operations — upload, export, slow search — should be cancellable.
 
