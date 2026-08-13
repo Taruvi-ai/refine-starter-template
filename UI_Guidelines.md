@@ -486,7 +486,7 @@ Decorative icons are `aria-hidden`; meaningful ones carry `titleAccess` or a lab
 
 NavKit (`@taruvi/navkit`) ships three variants — Blue `#2b97ff` (default), White (`#fff` + `#e5e7eb` border), Dark `#004369` (accent `#9de5fd`). Pick it in NavKit's `getTheme` callback in [`src/App.tsx`](src/App.tsx), not the MUI theme.
 
-Sidebar widths are constants in [`src/components/sidenav/MuiSidenav.tsx`](src/components/sidenav/MuiSidenav.tsx): collapsed 72px, expanded 240px. NavKit profile-menu items each need a unique `title`, an `icon`, and a `callBackFunc` — wire them through `<Navkit profileMenuItems={…} />`. Internal apps must include the standard **Report an issue** item ([`docs/standard-tasks.md`](docs/standard-tasks.md)).
+Sidebar widths are constants in [`src/components/sidenav/MuiSidenav.tsx`](src/components/sidenav/MuiSidenav.tsx): collapsed 72px, expanded 240px.
 
 Required: nav wrapped in `<nav aria-label="Main">` with the active item `aria-current="page"` · collapsed icon-only items keep their text as accessible name · the closed mobile drawer leaves the a11y tree (`inert` or `display:none`, not translated off-screen) · the hamburger carries `aria-expanded`, `aria-controls`, and a name · when desktop and mobile nav both exist in the DOM, only one is exposed to assistive tech at a time.
 
