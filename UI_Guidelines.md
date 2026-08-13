@@ -103,21 +103,10 @@ Every page satisfies these. They're the WCAG items MUI does *not* give you free.
 
 > **Beyond the floor — judgment, not required.** Worth it on tools that warrant the polish, optional on everyday internal apps: `aria-live="polite"` announcements for toasts / save confirmations / result & selection counts, and a skip link first in tab order. Dropping these means an app isn't *strictly* WCAG-AA on status messages (4.1.3) and bypass-blocks (2.4.1) — a fine trade for internal tooling, but make it a deliberate one.
 
-**Token gaps — all landed.** These were open against `themeOptions.ts`; they are fixed there now, so use the tokens as-is and don't re-patch them per component. Ratios below are measured, not estimated.
+**Token-level contrast is handled.** `themeOptions.ts` tokens meet WCAG AA —
+use them as-is, don't re-patch contrast per component.
 
-| Token | Was | Now |
-|---|---|---|
-| Focus ring `shadow.focusRing` | `rgba(30,136,229,0.35)` → 1.53:1 on white, 1.49:1 on the input fill | solid 2px `button.primaryDefault` → 3.32–3.68:1 light, 4.04–5.03:1 dark ✅ |
-| Contained primary button | white on `button.primaryDefault` `#1E88E5` → 3.68:1 | white on **`button.primaryFill`** `#1976d2` → 4.60:1 ✅ |
-| Filled warning chip | white on `#f57c00` → 2.70:1 | `text.primary` on `#f57c00` → 6.84:1 ✅ |
-| Filled success chip | white on `status.complete` `#388e3c` → 4.12:1 | white on **`status.completeChip`** `#2e7d32` → 5.13:1 ✅ |
-| **Outlined** warning chip (the HIGH priority chip) | `#f57c00` label → 2.70:1 | `warning[800]` `#bf360c` light → 5.09–5.60:1; `warning[300]` dark → 9.39–10.86:1 ✅ |
-| `MuiLink` | pinned `#1976d2` in both modes → 3.61:1 on the dark card, and only 4.18:1 on the light page background / 4.39:1 on a hovered row | mode-aware: `button.primaryHover` light → 5.22–5.75:1, `primary[300]` dark → 10.85–13.27:1 ✅ |
-| DataGrid cell / header focus | `outline: none`, no replacement — keyboard navigation invisible | 2px solid `button.primaryDefault` ring, offset −2 → 3.51:1+ light, 3.90:1+ dark ✅ |
-| Tag rotation `tagPalette[3]` (orange) | `#E65100` on `#FFF3E0` → 3.46:1 | `#BF360C` on `#FFF3E0` → 5.11:1 ✅ |
-| §2 `TO DO` chip **example in this document** | prescribed white on `#00acc1` → 2.74:1, and every page that copied it inherited the failure | example now specifies `text.primary` → 6.75:1 ✅ |
-
-**Two rules that follow from the above, and are the ones to actually remember:**
+**Two things to know about the blue accent and fill/label pairing:**
 
 - The blue accent has **three** jobs, and they are not interchangeable. `button.primaryDefault` (`#1E88E5`) is **non-text only** — rings, borders, tab indicator, control fills, where 3:1 is the bar. `button.primaryFill` (`#1976d2`) is the **fill** behind white text — contained primary buttons, `palette.primary.main`. `button.primaryHover` (`#1565C0`) is the **foreground** tone — link text, text/outlined button labels, selected tabs, focused field labels — with a light `primary[300]`-class tone standing in for it in dark mode. The theme already routes all three; don't reach past them.
 - **Pick a foreground tone that passes on the page background and on a hovered row, not just on paper.** `#1976d2` is 4.60:1 on `paper` but 4.18:1 on `background.default` and 4.39:1 on a hovered `primary[50]` row — and in-row links, chart-legend links and toolbar text buttons all live on those surfaces. A tone that only passes on paper is a latent failure that reappears on hover, which is exactly what a one-off audit won't catch twice.
