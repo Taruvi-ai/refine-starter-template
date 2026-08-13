@@ -15,6 +15,48 @@ Only build a UI-only prototype if the user explicitly asks for one.
 This is a **Refine.dev v5** project (React admin/dashboard framework). Even if the
 user asks for plain HTML/CSS/JS, always use React + Refine v5 + MUI + TypeScript.
 
+## Plan before building
+
+**Clarify only what changes the shape of the build.** If the request doesn't say
+whether it needs role-based access control beyond default auth, scheduled/
+automated jobs, external API integrations, or reporting/analytics beyond a
+simple filtered list, ask before planning — these decide whether the backend
+touches Cerbos policies, roles, functions, or analytics **at all**, and guessing
+wrong here costs a rebuild, not a tweak. Don't ask about things a sensible
+default already covers (field types, page layout, naming) — that's surveying,
+not clarifying.
+
+**Write a short spec before building — save it to `docs/spec.md`.** It lists
+each resource, its fields/types/relations, provider `meta` (which
+`dataProviderName`, `bucketName`, function slugs), and the page list per resource
+(list / show / create-edit / dashboard). This is what prevents rework on a real
+build — don't skip it, whether you're building sequentially yourself or
+coordinating multiple agents.
+
+**Scope it to what this build needs — not every backend capability that
+exists.** Plain datatables + default auth are the baseline; add nothing else
+unless clarified as needed:
+- **Cerbos policies / custom roles** — only for multi-role access control. The
+  template ships `accessControlProvider` commented out in `src/App.tsx` for
+  exactly this reason; most apps never uncomment it.
+- **Functions** — only when the skill's decision criteria apply (2+ resources at
+  runtime, event triggers, cron, external API + a stored secret, >30s work, a
+  public endpoint, complex authz, or a function pipeline). A plain CRUD resource
+  never needs one.
+- **Analytics queries** — only if reporting/dashboards beyond a simple filtered
+  list were asked for.
+
+An unrequested policy or function isn't neutral — it's dead weight every future
+change has to route around. When genuinely unsure whether something's needed,
+ask — don't default to yes.
+
+**This repo has an automated PR review.**
+[`.github/workflows/ui-ux-review.yml`](.github/workflows/ui-ux-review.yml) runs
+a UI/UX + accessibility check on every PR touching `src/pages/**` or
+`src/components/**`, posting findings as a PR comment — informational only,
+never blocks merge. You don't need to self-review before pushing; it runs
+automatically regardless of which tool wrote the code.
+
 ## Mandatory Taruvi preflight
 
 For anything touching Taruvi, `@taruvi/sdk`, or `@taruvi/refine-providers`, **read
