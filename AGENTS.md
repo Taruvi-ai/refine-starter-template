@@ -80,23 +80,27 @@ options, hook return shapes, and production UX patterns. Don't duplicate that he
 
 For anything that renders or styles UI:
 
-1. Read [`UI_Guidelines.md`](UI_Guidelines.md) — the companion to the MUI theme;
-   it resolves design decisions the theme can't encode. Read the section for the
-   page type you're building.
+1. `WebFetch` the design-system guidelines — the companion to the MUI theme; it
+   resolves design decisions the theme can't encode. These are **not** vendored
+   into this repo — they're maintained separately so every fork/app reads the
+   same current version instead of a copy that drifts. Fetch fresh each time,
+   don't rely on a memory of a prior fetch:
+   `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/UI_Guidelines.md`
 2. Import design tokens from [`themeOptions.ts`](themeOptions.ts)
    (`import { taruviTokens } from ".../themeOptions"`). **Never** hardcode brand
    hex values.
 3. Prefer plain MUI components — the theme already applies sizes, weights, radii,
    padding, shadows, colors via overrides. Don't re-style with `sx`/CSS.
 4. Use **`*Rounded`** icon variants from `@mui/icons-material`.
-5. **Page anatomy is mandatory** (details in `UI_Guidelines.md` + the frontend
-   skill): list pages need search + filters + active-filter chips + server-side
-   pagination + 4 empty states; show pages need breadcrumb + title + status chip +
-   actions + meta + tabs-with-counts; destructive actions need a confirmation
-   dialog; never render a blank page during load. Filters push into Refine's
-   server-side `filters[]`, never React state.
+5. **Page anatomy is mandatory** (details in the fetched guidelines + the
+   frontend skill): list pages need search + filters + active-filter chips +
+   server-side pagination + 4 empty states; show pages need breadcrumb + title +
+   status chip + actions + meta + tabs-with-counts; destructive actions need a
+   confirmation dialog; never render a blank page during load. Filters push into
+   Refine's server-side `filters[]`, never React state.
 
-If `UI_Guidelines.md` or `themeOptions.ts` is missing, stop and tell the user.
+If the guidelines fetch fails or `themeOptions.ts` is missing, stop and tell the
+user.
 
 ## Internal-app standard features
 

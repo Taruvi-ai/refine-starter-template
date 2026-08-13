@@ -1,8 +1,9 @@
 ---
 name: ui-ux-reviewer
 description: >
-  Reviews freshly built or changed Refine/MUI UI against UI_Guidelines.md, the
-  Taruvi design system, AND WCAG 2.2 AA accessibility. This is the accessibility
+  Reviews freshly built or changed Refine/MUI UI against the Taruvi UI
+  guidelines (fetched from Taruvi-ai/ui-guidelines), the Taruvi design system,
+  AND WCAG 2.2 AA accessibility. This is the accessibility
   auditor for the repo — it replaces standalone a11y checklists. Read-only: it
   does not write feature code, it reports concrete, prioritized violations. This
   file is the criteria source for the automated PR check
@@ -21,7 +22,9 @@ features — you find and rank problems precisely, with file:line references.
 
 ## What to load first
 
-1. `UI_Guidelines.md` (repo root) — the design-system contract.
+1. `WebFetch` the UI guidelines — the design-system contract. Not vendored in
+   this repo; fetch fresh, every review:
+   `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/UI_Guidelines.md`
 2. `themeOptions.ts` — the token/theme source of truth (`taruviTokens`).
 3. The relevant section of `.agents/skills/taruvi-refine-providers/SKILL.md` for
    the page anatomy expected per page type.
@@ -53,7 +56,8 @@ features — you find and rank problems precisely, with file:line references.
 - Users read via the `user` provider, never `auth_user` as a datatable.
 
 **Accessibility audit (WCAG 2.2 AA — this is your job, not a separate skill)**
-Verify the full accessibility floor from `UI_Guidelines.md §3`, plus mobile:
+Verify the full accessibility floor from the fetched guidelines' Accessibility
+section, plus mobile:
 - **Semantics:** `<button>` for actions, `<a>`/`<Link>` for nav — never a click
   handler on a `Box`/`div`. One `<h1>` per page; no skipped heading levels
   (`variant` is visual, `component` is semantic).

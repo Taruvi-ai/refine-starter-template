@@ -6,15 +6,16 @@ import Typography from "@mui/material/Typography";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 
 /**
- * The standard list-page shell — see `UI_Guidelines.md` §4.1.
+ * The standard list-page shell — see the "List page" section of the UI
+ * guidelines (Taruvi-ai/ui-guidelines).
  *
  * Every list page renders as **one** card section: heading + primary action,
  * then the toolbar row, then the active-filter chip row, then the rows. Use this
  * component rather than hand-rolling the scaffold.
  *
- * Why it exists: §4.1 mandated the *elements* of a list page (search, filters,
- * chip row, pagination, empty states) but never said what **contained** them —
- * unlike §4.2, which explicitly says to use Refine's `<Show>`. Three list pages
+ * Why it exists: the guidelines mandate the *elements* of a list page (search,
+ * filters, chip row, pagination, empty states) but never said what
+ * **contained** them. Three list pages
  * were built in parallel against that spec and produced three different
  * compositions: one Refine `<List>` card, one pair of detached `<Paper>` blocks,
  * and one with no container and a fixed-height grid. All three satisfied the

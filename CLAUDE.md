@@ -21,8 +21,8 @@ decisions as it moves resource to resource.
 | Specialist (`.claude/agents/`) | Owns | Loads |
 |---|---|---|
 | **`taruvi-backend`** | schema, policies, roles, Python functions, SQL | `taruvi-app-developer` skill |
-| **`taruvi-frontend`** | Refine/MUI pages, providers, hooks, dashboards, forms | `taruvi-refine-providers` skill + `UI_Guidelines.md` |
-| **`ui-ux-reviewer`** | audit built UI vs. design system + WCAG — runs via CI, not the coordinator (see step 4) | `UI_Guidelines.md` + theme |
+| **`taruvi-frontend`** | Refine/MUI pages, providers, hooks, dashboards, forms | `taruvi-refine-providers` skill + UI guidelines (fetched, see `AGENTS.md`) |
+| **`ui-ux-reviewer`** | audit built UI vs. design system + WCAG — runs via CI, not the coordinator (see step 4) | UI guidelines (fetched) + theme |
 
 ## The flow
 

@@ -27,10 +27,11 @@ the spec having to spell each one out.
    `.agents/skills/taruvi-refine-providers/references/`.
    - If it is missing, stop and report: install with
      `npx skills add Taruvi-ai/taruvi-skills` (they install on `npm install`).
-2. **Read `UI_Guidelines.md`** (repo root) — the design-system contract that the
-   MUI theme cannot encode on its own. Read the section relevant to the page type
-   you are building (list §4.1 + §4.5/§4.6/§4.7 for empty-states/loading/tables,
-   show §4.2, forms §4.3, destructive/confirm dialogs §4.4, bulk toolbar §4.8).
+2. **`WebFetch` the UI guidelines** — the design-system contract the MUI theme
+   cannot encode on its own. Not vendored in this repo; fetch fresh, every task:
+   `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/UI_Guidelines.md`
+   Apply everything relevant to the page type you're building — it's short
+   enough to read in full rather than jump to a section.
 3. Import design tokens from `themeOptions.ts` (`taruviTokens`). **Never**
    hardcode brand hex values.
 
