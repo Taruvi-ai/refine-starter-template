@@ -9,7 +9,7 @@ Raw tokens (colors, sizes, radii, shadows, spacing) live in [themeOptions.ts](th
 import { taruviTokens } from "../../theme/themeOptions";
 ```
 
-**How this file is organized.** §1–§3 are reference: what the theme already handles, which color to reach for, the accessibility floor. §4 is the working section — one part per thing you build, covering structure, behavior, and copy together. §5–§8 cover icons, navigation, charts, and where files live. §9 is product-level guidance for scoping conversations, not for code.
+**How this file is organized.** §1–§3 are reference: what the theme already handles, which color to reach for, the accessibility floor. §4 is the working section — one part per thing you build, covering structure, behavior, and copy together. §5–§8 cover icons, navigation, charts, and where files live.
 
 Each pattern in §4 states what's **required** first, then a short **judgment** note for the calls that depend on context. Required means required — a list page without a search input is incomplete, not a stylistic variation.
 
@@ -534,15 +534,3 @@ A chart is a complex image and color-coded data, so:
 | Accessibility audit | **ui-ux-reviewer** · `.claude/agents/ui-ux-reviewer.md` · runs via `.github/workflows/ui-ux-review.yml` on every PR |
 
 When you need a value the theme doesn't surface, import `taruviTokens` rather than hardcoding hex — it keeps the design system traceable.
-
----
-
-## 9. Product-level guidance
-
-Not evaluable from a component file. These belong in scoping conversations and design review — and they're worth pushing back with when a request conflicts with them.
-
-**Trust** — pricing, limits, and consequences visible before commitment, never a surprise at the final step · accept and decline get equal prominence, no giant "Yes" beside a hidden "no thanks" link · cancellation as easy as signup, no forced chat or call · no confirm-shaming ("No thanks, I hate saving money") · pre-checked boxes never used for consent, marketing, or paid add-ons · data collection explained at the point of asking · opt-outs honored immediately and granularly · countdown timers and scarcity claims only when literally true.
-
-**Information architecture** — top-level nav ≤7 items, labelled with nouns users recognize rather than internal terms · core tasks reachable in three clicks, frequent tasks one click from home · account, billing, and logout findable within two clicks · settings organized by user goal and searchable when extensive · onboarding skippable and resumable, never forced · value shown before forced account creation where the domain allows it.
-
-Basis: Nielsen's usability heuristics, platform HIG conventions, standing industry practice.
