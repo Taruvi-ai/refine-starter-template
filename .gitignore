@@ -39,6 +39,11 @@ _.sln
 .codex/skills/taruvi-*
 skills-lock.json
 
+# Codex subagents — generated from .claude/agents/*.md on every `npm install`
+# (postinstall, see scripts/generate-codex-agents.mjs). Source of truth is the
+# .md files; never hand-edit or commit the generated .toml.
+.codex/agents/
+
 # Auth secrets
 auth.json
 .codex/auth.json

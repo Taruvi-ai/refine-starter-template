@@ -10,9 +10,10 @@ const SUPPORT_TICKET_URL = "https://support.taruvi.app/";
  * Custom entries for the Navkit profile menu (avatar dropdown).
  * Items appear after Dark Mode and before Logout (which Navkit renders itself).
  *
- * "Report an issue" is a standard internal-app feature — see
- * docs/standard-tasks.md. Add more items to the returned array as needed;
- * each needs a unique `title`, an `icon`, and a `callBackFunc`.
+ * "Report an issue" ships by default for internal Taruvi apps — don't remove
+ * it without confirming the app doesn't need it. Add more items to the
+ * returned array as needed; each needs a unique `title`, an `icon`, and a
+ * `callBackFunc`.
  */
 export function useNavkitProfileMenuItems(): ProfileMenuItem[] {
   return useMemo(
