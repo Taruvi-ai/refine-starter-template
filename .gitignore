@@ -26,9 +26,23 @@ _.njsproj
 _.sln
 \*.sw?
 .mcp.json
-.claude/
+.claude/*
+!.claude/agents/
+.claude/settings.local.json
 .env
 .env.local
+
+# Taruvi skills — fetched latest on every `npm install` (postinstall), never
+# committed, so installs stay reproducible and the tree never drifts.
+# context7-mcp and the .kiro/skills symlink are NOT Taruvi skills — they stay tracked.
+.agents/skills/
+.codex/skills/taruvi-*
+skills-lock.json
+
+# Codex subagents — generated from .claude/agents/*.md on every `npm install`
+# (postinstall, see scripts/generate-codex-agents.mjs). Source of truth is the
+# .md files; never hand-edit or commit the generated .toml.
+.codex/agents/
 
 # Auth secrets
 auth.json

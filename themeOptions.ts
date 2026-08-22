@@ -23,12 +23,24 @@ declare module "@mui/material/Chip" {
     tagPurple: true;
     tagGreen: true;
     tagOrange: true;
+    tagTeal: true;
+    tagPink: true;
+    tagLime: true;
+    tagRose: true;
   }
 }
 
 // ─── Font families ──────────────────────────────────────────────────
 const FONT_BODY = "'Open Sans', sans-serif";
 const FONT_TITLE = "'Quicksand', sans-serif";
+
+// Primary accent hex, hoisted so `button.primaryDefault` and the focus-ring
+// shadow token can never drift apart. Measured: 3.68:1 on white paper,
+// 3.34:1 on the page background, 3.32:1 on the input fill, 4.04–5.03:1 on the
+// dark surfaces — above the 3:1 WCAG 1.4.11 floor for a *non-text* focus
+// indicator, but below the 4.5:1 text floor, which is why text-bearing
+// surfaces use `button.primaryFill` instead.
+const PRIMARY_ACCENT = '#1E88E5';
 
 // ─── Brand tokens (full ramps + every named color from the spec) ────
 export const taruviTokens = {
@@ -118,7 +130,14 @@ export const taruviTokens = {
 
   // Primary button states (filled blue button system)
   button: {
-    primaryDefault: '#1E88E5',
+    primaryDefault: PRIMARY_ACCENT,
+    // AA fill/foreground for *text-bearing* primary surfaces. White on
+    // #1E88E5 is only 3.68:1 (WCAG 1.4.3 wants 4.5:1); white on #1976d2 is
+    // 4.60:1. Same value as `status.inProgress` — the design system's chip /
+    // link blue — exposed here under a button-semantic name. `primaryDefault`
+    // stays the brand accent for non-text uses (focus rings, borders, the tab
+    // indicator, checkbox/switch fills) where 3:1 is the bar.
+    primaryFill: '#1976d2',
     primaryHover: '#1565C0',
     primaryActive: '#0D47A1',
     primaryDisabled: '#BBDEFB',
@@ -128,6 +147,12 @@ export const taruviTokens = {
   // Status / chart colors
   status: {
     complete: '#388e3c',
+    // `complete` carries a white chip label at only 4.12:1. `completeChip` is
+    // the AA fill for filled success chips and the success-alert accent
+    // (white on #2e7d32 = 5.13:1; #2e7d32 on the success-alert tint = 4.53:1).
+    // Same Material green family, one step darker. Keep `complete` for
+    // non-text uses (chart marks, borders).
+    completeChip: '#2e7d32',
     inProgress: '#1976d2',
     review: '#f57c00',
     delayed: '#c2185b',
@@ -143,20 +168,35 @@ export const taruviTokens = {
 
   // Tag / category chips
   //
-  // The design system uses a 4-color **pastel rotation palette** for category
-  // chips (Design / Development / Marketing / Research are shown in four
-  // distinct fills). Also exposed as MuiChip variants `tagBlue`/`tagPurple`/
-  // `tagGreen`/`tagOrange` — prefer those over reading raw values.
+  // The design system uses a **pastel rotation palette** for category chips
+  // (pastel fill + same-hue dark label). Extended from 4 to 8 entries so a
+  // tenant with more than four categories can still give each one a distinct
+  // preset. Also exposed as MuiChip variants `tagBlue`/`tagPurple`/`tagGreen`/
+  // `tagOrange`/`tagTeal`/`tagPink`/`tagLime`/`tagRose` — prefer those over
+  // reading raw values. Index order here matches that variant order, and
+  // entries 0–3 keep their original values so any colour already assigned to
+  // a category stays put.
   tag: {
     fillBg: '#E0F6FE',     // legacy single-fill (kept for backward compat)
     fillText: '#004369',
     outlineColor: '#1976d2',
   },
+  // Every pair is ≥4.5:1 label-on-fill (measured, WCAG 1.4.3), the fills are
+  // all L*93–96 / C*8–16 so the set reads as one family, and the minimum
+  // pairwise CIEDE2000 between any two fills is 7.5 (tagPurple↔tagPink) —
+  // comfortably above the ~2.3 just-noticeable threshold. Every fill is ≥24
+  // ΔE2000 from every saturated `status.*` chip tone, so a category chip can't
+  // be mistaken for a status chip. Entries 4–7 were placed at the four widest
+  // gaps in the original four's Lab hue circle (h110 / h190 / h330 / h35).
   tagPalette: [
-    { bg: '#E0F6FE', text: '#004369' }, // blue — Design
-    { bg: '#EDE7F6', text: '#4527A0' }, // purple — Development
-    { bg: '#E8F5E9', text: '#1B5E20' }, // green — Marketing
-    { bg: '#FFF3E0', text: '#E65100' }, // orange — Research
+    { bg: '#E0F6FE', text: '#004369' }, // blue   — 9.36:1
+    { bg: '#EDE7F6', text: '#4527A0' }, // purple — 8.47:1
+    { bg: '#E8F5E9', text: '#1B5E20' }, // green  — 7.00:1
+    { bg: '#FFF3E0', text: '#BF360C' }, // orange — 5.11:1 (was #E65100, only 3.46:1)
+    { bg: '#C8F7F3', text: '#00514D' }, // teal   — 7.90:1
+    { bg: '#FFE5FB', text: '#68315B' }, // pink   — 8.19:1
+    { bg: '#EFF0D1', text: '#41480E' }, // lime   — 8.37:1
+    { bg: '#FFE4DF', text: '#732F2C' }, // rose   — 8.02:1
   ],
 
   // Tab / surface tokens
@@ -189,8 +229,13 @@ export const taruviTokens = {
     nav: '0 2px 8px rgba(0,0,0,0.12)',
     sidebar: '0 2px 8px rgba(0,0,0,0.08)',
     swatch: '0 1px 6px rgba(0,0,0,0.10)',
-    // 2px solid-feeling ring at higher opacity — matches design "ring outline (2px, --ring-color)"
-    focusRing: '0 0 0 2px rgba(30,136,229,0.35)',
+    // 2px **solid** ring — design calls for "ring outline (2px, --ring-color)".
+    // It used to be rgba(30,136,229,0.35), which composited to 1.53:1 against
+    // white and 1.49:1 against the input fill: far under the 3:1 WCAG 1.4.11
+    // floor for a focus indicator. Solid measures 3.68:1 on paper, 3.34:1 on
+    // the page background, 3.32:1 on the input fill, and 4.04–5.03:1 on the
+    // dark surfaces.
+    focusRing: `0 0 0 2px ${PRIMARY_ACCENT}`,
   },
 
   // Border radii (toned down ~50% from the design-system defaults)
@@ -415,6 +460,54 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
   const isLight = mode === 'light';
   const dividerColor = isLight ? taruviTokens.surface.borderLight : 'rgba(255,255,255,0.08)';
 
+  // The accent used as a *foreground* (link text, text/outlined button labels,
+  // selected tab, focused field label). `button.primaryDefault` is only
+  // 3.68:1 on white — fine for a 2px ring (1.4.11 → 3:1), short of the 4.5:1
+  // text floor (1.4.3).
+  //
+  // Light uses `button.primaryHover` (#1565C0), not `primaryFill` (#1976d2).
+  // #1976d2 clears 4.5:1 only on paper (4.60:1) and drops to 4.18:1 on
+  // `background.default` and 4.39:1 on a hovered `primary[50]` row — and this
+  // app puts blue foregrounds on exactly those surfaces (chart-legend links,
+  // the ticket-number column and other in-row links, mailto/tel links). A tone
+  // that passes only on paper is a latent failure that returns the moment
+  // someone hovers a row. #1565C0 measures 5.75 paper / 5.22 page bg / 5.48
+  // hovered row / 5.14 primary[100] — uniformly passing, no per-surface caveat.
+  // `primaryFill` stays the AA *fill* for white-on-blue (contained buttons,
+  // `palette.primary.main`); this is its foreground counterpart.
+  //
+  // Dark needs a light tone — `primary[300]` is 11.92:1 on the dark card,
+  // 13.27:1 on the dark page background, 10.85:1 on a hovered row.
+  const accentFg = isLight ? taruviTokens.button.primaryHover : taruviTokens.primary[300];
+  // Hover/active step for that accent: darker in light, lighter in dark, so the
+  // label keeps ≥4.5:1 over the tinted hover fill — measured 7.45–8.23:1 in
+  // light, 11.00:1 in dark. (Colour alone is a weak state signal at this step;
+  // the hover affordance is `MuiLink`'s underline and the buttons' tint fill.)
+  const accentFgHover = isLight ? taruviTokens.button.primaryActive : taruviTokens.primary[200];
+  const accentTintHover = isLight ? '#e3f0fb' : 'rgba(30,136,229,0.16)';
+
+  // Chip label tones for the **outlined** variant. A filled chip puts the
+  // design-system tone in the background behind a white/dark label; an
+  // outlined chip puts that tone *on the label*, so it has to clear the 4.5:1
+  // text floor against every surface a chip can land on — paper, the page
+  // background, and the `primary[50]` hover/selected row fill. Worst-case
+  // measurements are in the comments; the lowest of the eight is 4.66:1.
+  const outlinedChipFg = isLight
+    ? {
+        primary: taruviTokens.button.primaryHover, // 5.75 / 5.22 / 5.48
+        success: taruviTokens.status.completeChip, // 5.13 paper / 4.66 page bg / 4.89 row
+        info: taruviTokens.button.primaryHover,    // 5.75 / 5.22 / 5.48 — status.inProgress is only 4.18 on the page bg
+        warning: taruviTokens.warning[800],        // 5.60 / 5.09 / 5.34
+        error: taruviTokens.error[600],            // 5.87 / 5.34 / 5.60
+      }
+    : {
+        primary: taruviTokens.primary[300],  // 11.92 / 10.30
+        success: taruviTokens.success[300],  // 8.26 dark paper / 7.14 dark selected row
+        info: taruviTokens.primary[300],     // 11.92 / 10.30
+        warning: taruviTokens.warning[300],  // 10.86 / 9.39
+        error: taruviTokens.error[300],      // 5.43 / 4.70
+      };
+
   return {
     // ─ Global base
     MuiCssBaseline: {
@@ -469,7 +562,9 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           minHeight: taruviTokens.size.btnLgMinH,
         },
         containedPrimary: {
-          backgroundColor: taruviTokens.button.primaryDefault,
+          // `primaryFill`, not `primaryDefault`: white on #1E88E5 is 3.68:1,
+          // white on #1976d2 is 4.60:1 (WCAG 1.4.3). Hover 5.75:1, active 8.63:1.
+          backgroundColor: taruviTokens.button.primaryFill,
           color: '#fff',
           '&:hover': { backgroundColor: taruviTokens.button.primaryHover, boxShadow: 'none' },
           '&:active': { backgroundColor: taruviTokens.button.primaryActive },
@@ -480,12 +575,15 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         },
         outlinedPrimary: {
           borderWidth: 2,
-          borderColor: taruviTokens.button.primaryDefault,
-          color: taruviTokens.button.primaryDefault,
+          borderColor: accentFg,
+          color: accentFg,
           '&:hover': {
             borderWidth: 2,
-            backgroundColor: '#e3f0fb',
-            borderColor: taruviTokens.button.primaryHover,
+            // The hover tint has to stay mode-aware, otherwise the dark-mode
+            // label (`primary[300]`) lands on a near-white fill at 1.20:1.
+            backgroundColor: accentTintHover,
+            borderColor: accentFgHover,
+            color: accentFgHover,
           },
         },
         containedError: {
@@ -504,8 +602,11 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           },
         },
         text: {
-          color: taruviTokens.button.primaryDefault,
-          '&:hover': { backgroundColor: 'rgba(30,136,229,0.06)' },
+          color: accentFg,
+          '&:hover': {
+            backgroundColor: 'rgba(30,136,229,0.06)',
+            color: accentFgHover, // 5.37:1 on the light tint, 11.12:1 on the dark one
+          },
         },
       },
     },
@@ -555,20 +656,71 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         },
         outlined: { borderWidth: 1.5 },
         label: { paddingLeft: 8, paddingRight: 8 },
-        // Color variants line up with MUI's color="success"/etc.
-        colorSuccess: { backgroundColor: '#388e3c', color: '#fff' },
-        colorInfo: { backgroundColor: taruviTokens.status.inProgress, color: '#fff' },
-        colorWarning: { backgroundColor: taruviTokens.status.review, color: '#fff' },
-        colorError: { backgroundColor: taruviTokens.error[600], color: '#fff' },
+        // Color variants line up with MUI's color="success"/etc. These are the
+        // **filled** treatments; the `variants` block below re-states the
+        // outlined ones, because a `colorX` styleOverride also lands on
+        // outlined chips (MUI's overridesResolver emits `color${Color}` before
+        // `${variant}${Color}`) and would otherwise paint an outlined chip with
+        // a fill it was never designed to carry.
+        colorSuccess: {
+          // white on `status.complete` #388e3c is 4.12:1 at the 11px chip label
+          // size; `completeChip` #2e7d32 takes it to 5.13:1 (WCAG 1.4.3).
+          backgroundColor: taruviTokens.status.completeChip,
+          color: '#fff',
+        },
+        colorInfo: { backgroundColor: taruviTokens.status.inProgress, color: '#fff' }, // 4.60:1
+        colorWarning: {
+          backgroundColor: taruviTokens.status.review,
+          // Dark label on the orange fill: white on #f57c00 is 2.70:1, whereas
+          // `text.primary` on it is 6.84:1. This is the fix UI_Guidelines §3
+          // prescribed for this token ("use dark text on that fill").
+          color: taruviTokens.text.primary,
+          '& .MuiChip-deleteIcon': { color: taruviTokens.text.primary },
+        },
+        colorError: { backgroundColor: taruviTokens.error[600], color: '#fff' }, // 5.87:1
       },
-      // Tag-chip rotation palette (UI_Guidelines §3). Pick one explicitly
-      // (`variant="tagBlue"`) or compute via a small hash from the tag name
-      // for deterministic per-name assignment.
+      // `theme.components.MuiChip.variants` is resolved *after* `styleOverrides`,
+      // so these win over the `colorX` fills above — that ordering is what makes
+      // the outlined entries effective.
       variants: [
-        { props: { variant: 'tagBlue' as const },   style: { backgroundColor: '#E0F6FE', color: '#004369', textTransform: 'none' } },
-        { props: { variant: 'tagPurple' as const }, style: { backgroundColor: '#EDE7F6', color: '#4527A0', textTransform: 'none' } },
-        { props: { variant: 'tagGreen' as const },  style: { backgroundColor: '#E8F5E9', color: '#1B5E20', textTransform: 'none' } },
-        { props: { variant: 'tagOrange' as const }, style: { backgroundColor: '#FFF3E0', color: '#E65100', textTransform: 'none' } },
+        // Outlined chips (priority chips — UI_Guidelines §2): transparent fill,
+        // the tone moves onto the label and border, mode-aware so it clears
+        // 4.5:1 in both themes. See `outlinedChipFg` for the measurements.
+        {
+          // The active-filter chip row (§4.1) is `variant="outlined" color="primary"`
+          // and often sits on the page background, where `primary.main` is 4.18:1.
+          props: { variant: 'outlined' as const, color: 'primary' as const },
+          style: { backgroundColor: 'transparent', color: outlinedChipFg.primary, borderColor: outlinedChipFg.primary },
+        },
+        {
+          props: { variant: 'outlined' as const, color: 'success' as const },
+          style: { backgroundColor: 'transparent', color: outlinedChipFg.success, borderColor: outlinedChipFg.success },
+        },
+        {
+          props: { variant: 'outlined' as const, color: 'info' as const },
+          style: { backgroundColor: 'transparent', color: outlinedChipFg.info, borderColor: outlinedChipFg.info },
+        },
+        {
+          props: { variant: 'outlined' as const, color: 'warning' as const },
+          style: { backgroundColor: 'transparent', color: outlinedChipFg.warning, borderColor: outlinedChipFg.warning },
+        },
+        {
+          props: { variant: 'outlined' as const, color: 'error' as const },
+          style: { backgroundColor: 'transparent', color: outlinedChipFg.error, borderColor: outlinedChipFg.error },
+        },
+        // Tag-chip rotation palette (UI_Guidelines §2) — pastel fill + same-hue
+        // dark label, 8 entries. Pick one explicitly (`variant="tagBlue"`) or
+        // hash the tag name to an index for deterministic per-name assignment
+        // (a small `tagVariant()` helper). Values and their measured label
+        // contrast live in `taruviTokens.tagPalette`.
+        { props: { variant: 'tagBlue' as const },   style: { backgroundColor: taruviTokens.tagPalette[0].bg, color: taruviTokens.tagPalette[0].text, textTransform: 'none' } },
+        { props: { variant: 'tagPurple' as const }, style: { backgroundColor: taruviTokens.tagPalette[1].bg, color: taruviTokens.tagPalette[1].text, textTransform: 'none' } },
+        { props: { variant: 'tagGreen' as const },  style: { backgroundColor: taruviTokens.tagPalette[2].bg, color: taruviTokens.tagPalette[2].text, textTransform: 'none' } },
+        { props: { variant: 'tagOrange' as const }, style: { backgroundColor: taruviTokens.tagPalette[3].bg, color: taruviTokens.tagPalette[3].text, textTransform: 'none' } },
+        { props: { variant: 'tagTeal' as const },   style: { backgroundColor: taruviTokens.tagPalette[4].bg, color: taruviTokens.tagPalette[4].text, textTransform: 'none' } },
+        { props: { variant: 'tagPink' as const },   style: { backgroundColor: taruviTokens.tagPalette[5].bg, color: taruviTokens.tagPalette[5].text, textTransform: 'none' } },
+        { props: { variant: 'tagLime' as const },   style: { backgroundColor: taruviTokens.tagPalette[6].bg, color: taruviTokens.tagPalette[6].text, textTransform: 'none' } },
+        { props: { variant: 'tagRose' as const },   style: { backgroundColor: taruviTokens.tagPalette[7].bg, color: taruviTokens.tagPalette[7].text, textTransform: 'none' } },
       ],
     },
 
@@ -685,7 +837,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           fontSize: taruviTokens.fontSize.formLabel,    // 13px
           fontWeight: 600,
           color: isLight ? taruviTokens.text.primary : '#f8fafc',
-          '&.Mui-focused': { color: taruviTokens.button.primaryDefault },
+          '&.Mui-focused': { color: accentFg },
           '&.Mui-error': { color: taruviTokens.error[600] },
         },
       },
@@ -791,6 +943,19 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
     // ─ DataGrid (mirrors MuiTable* styling so DataGrid-based list pages
     //   and hand-rolled <Table> pages look identical — UI_Guidelines §4.7)
     MuiDataGrid: {
+      // v7 takes the header height from the `columnHeaderHeight` **prop**
+      // (default 56), not from CSS: `.MuiDataGrid-columnHeaders` carries only
+      // `width`, so the `minHeight`/`maxHeight`/`lineHeight` this block used to
+      // declare on that slot were inert and the header rendered at 56px.
+      //
+      // `defaultProps` is honoured, not just `styleOverrides`:
+      // `useDataGridProps` runs `getThemeProps({ name: 'MuiDataGrid' })` and
+      // only falls back to `DATA_GRID_PROPS_DEFAULT_VALUES` for keys the theme
+      // left unset — so all three list grids pick up 44px without repeating
+      // the prop per page.
+      defaultProps: {
+        columnHeaderHeight: 44,
+      },
       styleOverrides: {
         root: {
           borderRadius: taruviTokens.radius.xl,                          // 8px (toned)
@@ -798,16 +963,88 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           backgroundColor: isLight ? taruviTokens.surface.paper : '#11202a',
           fontFamily: FONT_BODY,
           fontSize: taruviTokens.fontSize.tableCell,                     // 13px
-          // No focus outlines on cells / rows — design uses subtle hover/selected fills instead
-          '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none' },
-          '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+          // The header band's tint belongs on this variable, not on the
+          // `columnHeaders` slot. v7 paints every `[role=row]` inside
+          // `.MuiDataGrid-container--top` with `--DataGrid-containerBackground`
+          // (default `palette.background.default` = #f3f4f6), and the header row
+          // *is* one of those rows — it is a child of `.MuiDataGrid-columnHeaders`,
+          // so it painted #f3f4f6 straight over any tint set on its parent.
+          // Colouring the variable tints the element that actually ends up on top.
+          //
+          // Scope-checked in the installed source: this variable is read in
+          // exactly one rule (`container--top` / `container--bottom` rows).
+          // Pinned cells read a separate `--DataGrid-pinnedBackground`, so this
+          // cannot leak into them.
+          //
+          // The dark value is translucent, which is safe only because every list
+          // uses `autoHeight`: the header's container is `position: sticky`, but
+          // with `autoHeight` the scroller never scrolls vertically, so no row
+          // ever passes under it. A grid with a fixed height needs an opaque
+          // value here or rows will show through the header band.
+          '--DataGrid-containerBackground': isLight
+            ? taruviTokens.neutral[50]
+            : 'rgba(255,255,255,0.04)',
+          // List pages use `autoHeight` (UI_Guidelines §4.1 — no fixed pixel
+          // height), and `autoHeight` collapses DataGrid overlays to 0px. That
+          // silently hides the loading skeleton and every §4.5 empty state
+          // rendered through `slots.noRowsOverlay` — a real regression, not a
+          // cosmetic one. Reserving the height here rather than per page keeps
+          // three grids from drifting to three different values. Only the
+          // overlay is sized; the grid itself still grows with its rows.
+          '--DataGrid-overlayHeight': '320px',
+          // Keyboard cell/header navigation must be visible — WCAG 2.4.7. This
+          // used to be `outline: 'none'` with no replacement, which made
+          // arrow-key navigation invisible in every grid.
+          //
+          // Deliberately `:focus` / `:focus-within` rather than `:focus-visible`:
+          // DataGrid moves focus programmatically as you arrow around, and
+          // whether `:focus-visible` matches a scripted `.focus()` is a browser
+          // heuristic we can't verify here. A stray ring after a mouse click is
+          // a cosmetic cost; a missing ring for keyboard users is a blocker.
+          //
+          // MUI's own default is a 1px ring at alpha 0.5 (≈1.9:1 on white,
+          // under the 3:1 floor); 2px solid measures 3.51–3.68:1 in light
+          // (paper / header / selected row) and 3.90–4.52:1 in dark.
+          '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within':
+            {
+              outline: `2px solid ${taruviTokens.button.primaryDefault}`,
+              outlineOffset: '-2px',
+            },
         },
+        // Height now comes from `defaultProps.columnHeaderHeight`, and the tint
+        // from `--DataGrid-containerBackground` on `root`. All this slot still
+        // owns is the divider under the header, which draws on this element's
+        // own bottom edge — below the header row, so it stays visible.
         columnHeaders: {
-          backgroundColor: isLight ? taruviTokens.neutral[50] : 'rgba(255,255,255,0.04)',
           borderBottom: `1px solid ${dividerColor}`,
-          minHeight: 44,
-          maxHeight: 44,
-          lineHeight: '44px',
+        },
+        // Header labels share the cells' 16px inset (see `cell` below), which is
+        // also what `MuiTableCell` uses for both head and body — the parity this
+        // whole block exists for. v7 ships `padding: 0 10px` on headers and
+        // cells alike, so before this the header inset was 10px against the
+        // cells' 16px.
+        //
+        // Worth knowing: for the *centred* columns this is cosmetically neutral
+        // (a symmetric inset doesn't move the centre) and it costs 12px of label
+        // room, since `GridColumnHeaderTitle` truncates with an ellipsis. It
+        // only bites on a narrow right-aligned column — e.g. a 72px actions
+        // column leaves ~40px for "ACTIONS", which needs ~57px at 11px/0.06em
+        // and so was already truncating at the old 10px inset.
+        columnHeader: {
+          // 16px matches the `cell` inset above, so a header label sits on the
+          // same leading edge as the values under it. v7 ships `0 10px` on both,
+          // and this block's job is `MuiTableCell` parity (16px head and body).
+          //
+          // No horizontal alignment override: headers inherit v7's left default
+          // and line up with the left-aligned values (UI_Guidelines §4.7). A
+          // previous revision centred the title container here — reverted. Note
+          // if you ever reconsider: `headerAlign` has no default (the string
+          // column type sets `align: 'left'` but leaves `headerAlign` undefined,
+          // and `GridColumnHeaderItem` only adds `columnHeader--alignLeft` when
+          // it is *explicitly* `'left'`), so a rule hung on `--alignLeft`
+          // silently matches nothing.
+          paddingLeft: 16,
+          paddingRight: 16,
         },
         columnHeaderTitle: {
           fontFamily: FONT_TITLE,
@@ -817,10 +1054,48 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           letterSpacing: taruviTokens.letterSpacing.tableHead,
           color: isLight ? taruviTokens.text.muted : taruviTokens.neutral[400],
         },
+        // Horizontal padding only. v7 ships `padding: 0 10px` on cells on
+        // purpose: it centres content vertically via
+        // `line-height: calc(var(--height) - 1px)`, so vertical padding shifts
+        // text down by that amount — the old `12px 16px` sat every row of every
+        // list ~11px low. Vertical centring here comes from `alignItems`
+        // instead, which is why `lineHeight` is handed back to `inherit`; the
+        // two mechanisms must not both be live.
+        //
+        // `display: flex` is exactly what v7's own `cell--flex` class does for
+        // `column.display: 'flex'`, applied to every cell rather than per
+        // column. It is what makes the alignment slots below work at all:
+        // `.MuiDataGrid-cell` is `flex: 0 0 auto`, a flex *item* of the row and
+        // not a container, so the `justifyContent` on `cell--text*` is inert
+        // until the cell becomes a container. Flex was chosen over
+        // `text-align: center` because it is the only one of the two that also
+        // centres block-level children — several `renderCell`s return a
+        // `<Stack>`, which `text-align` would leave hugging the left edge and
+        // the top of the row.
+        //
+        // Trade-off: a flex cell no longer applies its own
+        // `text-overflow: ellipsis` to a bare string child. Nothing here relies
+        // on that — all 21 data columns across the three lists render through
+        // `renderCell` — but a new column that emits long unwrapped text (or a
+        // bare `valueFormatter` string) must ellipsize in its own element.
+        // See UI_Guidelines §4.7.
         cell: {
-          padding: taruviTokens.spacing.tableCell,                       // 12 16
+          display: 'flex',
+          alignItems: 'center',
+          lineHeight: 'inherit',
+          padding: '0 16px',
           borderBottom: `1px solid ${isLight ? taruviTokens.surface.borderTableRow : 'rgba(255,255,255,0.06)'}`,
         },
+        // Horizontal alignment is deliberately left to v7's own rules — it
+        // already ships `justify-content: flex-start / center / flex-end` on
+        // `cell--textLeft / --textCenter / --textRight`, and left is the default.
+        // So list values hug the leading edge (UI_Guidelines §4.7) while the
+        // `alignItems: center` above keeps them centred in the row.
+        //
+        // There is deliberately no `cell--textLeft` override here. An earlier
+        // revision centred it horizontally; that was reverted as a house-style
+        // decision. Don't re-add it — set `align`/`headerAlign` on the specific
+        // column instead if one genuinely needs centring.
         row: {
           '&:hover': {
             backgroundColor: isLight ? taruviTokens.primary[50] : 'rgba(30,136,229,0.08)',
@@ -957,9 +1232,12 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         message: { padding: 0 },
         standardSuccess: {
           backgroundColor: taruviTokens.success[50],
-          borderLeftColor: '#388e3c',
+          // `completeChip` over `complete`: the alert icon is a meaningful
+          // graphic (WCAG 1.4.11 → 3:1) and #388e3c on this tint is only
+          // 3.64:1; #2e7d32 gives 4.53:1.
+          borderLeftColor: taruviTokens.status.completeChip,
           color: isLight ? taruviTokens.text.primary : '#f8fafc',
-          '& .MuiAlert-icon': { color: '#388e3c' },
+          '& .MuiAlert-icon': { color: taruviTokens.status.completeChip },
         },
         standardError: {
           backgroundColor: taruviTokens.error[50],
@@ -975,9 +1253,11 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         },
         standardWarning: {
           backgroundColor: taruviTokens.warning[50],
-          borderLeftColor: taruviTokens.warning[500],
+          // `warning[500]` #f57c00 on this tint is 2.55:1 — under the 3:1 floor
+          // for the icon (1.4.11). `warning[800]` gives 5.27:1.
+          borderLeftColor: taruviTokens.warning[800],
           color: isLight ? taruviTokens.text.primary : '#f8fafc',
-          '& .MuiAlert-icon': { color: taruviTokens.warning[500] },
+          '& .MuiAlert-icon': { color: taruviTokens.warning[800] },
         },
       },
     },
@@ -1014,7 +1294,12 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       defaultProps: { underline: 'hover' },
       styleOverrides: {
         root: {
-          color: taruviTokens.status.inProgress,
+          // Was pinned to #1976d2 in both modes: 3.61:1 on the dark card
+          // (#11202a) — a text failure everywhere links appear in dark mode —
+          // and only 4.18:1 on the light page background / 4.39:1 on a hovered
+          // row. Now mode-aware via `accentFg`: 5.22–5.75:1 light, 10.85–13.27:1
+          // dark, on every surface links actually land on in this app.
+          color: accentFg,
           fontWeight: 500,
           fontFamily: FONT_BODY,
         },
@@ -1139,7 +1424,9 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           textTransform: 'uppercase',
           letterSpacing: taruviTokens.letterSpacing.button,
           minHeight: 40,
-          '&.Mui-selected': { color: taruviTokens.button.primaryDefault },
+          // The 3px indicator below stays on `primaryDefault` (non-text, 3:1);
+          // the selected *label* is text, so it takes the AA accent.
+          '&.Mui-selected': { color: accentFg },
         },
       },
     },
@@ -1206,7 +1493,13 @@ export const lightThemeOptions: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
-      main: taruviTokens.button.primaryDefault,  // #1E88E5
+      // `primaryFill` (#1976d2), not `primaryDefault` (#1E88E5): `primary.main`
+      // is what MUI pairs with `contrastText` for every `color="primary"`
+      // surface it derives itself — filled/outlined primary chips (the
+      // active-filter chip row on every list page) and the bulk-selection
+      // toolbar among them. White on #1E88E5 is 3.68:1; on #1976d2 it is
+      // 4.60:1, and #1976d2 as a label on paper is likewise 4.60:1.
+      main: taruviTokens.button.primaryFill,     // #1976d2
       light: taruviTokens.primary[300],
       dark: taruviTokens.button.primaryActive,
       contrastText: '#ffffff',

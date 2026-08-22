@@ -1,77 +1,65 @@
-# Taruvi Hackathon Template (Refine v5)
+# Taruvi Refine Template (Refine v5)
 
-This repository is the official starter template for Taruvi hackathons.
+The standard starter template for building Taruvi apps with **Refine v5 + React +
+MUI + TypeScript**, pre-wired to the Taruvi providers and MCP server.
 
-It includes:
-- A Refine v5 + React app scaffold
-- GitHub Codespaces-ready devcontainer setup
-- Guided Codex startup flow for required Taruvi environment variables
-- MCP configuration for Taruvi + helpful developer tools
+## What's included
 
-## Who This Is For
+- Refine v5 + React + TypeScript + MUI app scaffold
+- All Taruvi providers configured (`data`, `storage`, `app`, `user`, `auth`,
+  `accessControl`) in `src/providers/refineProviders.ts`
+- Taruvi MCP configuration for Claude Code, Codex, Kiro, and VS Code
+- Two IDE-agnostic skills — **`taruvi-app-developer`** (backend) and
+  **`taruvi-refine-providers`** (frontend) — installed automatically on
+  `npm install`
+- Claude Code subagents (`.claude/agents/`) for coordinated backend/frontend/UX
+  workflows
 
-- **Participants**: use this template to start building quickly in Codespaces.
-- **Organizers/Mentors**: use this for standardized onboarding across teams.
-
-## Hackathon Flow
-
-### Organizer-side (Advanced setup)
-1. Sign up for GitHub Codespaces in Advanced.
-2. Create sites for each group based on color coding in Advanced.
-3. Ensure participants accept their Taruvi Console invite.
-
-### Participant-side setup
-0. In Taruvi Console, create your app and collect:
-   - `TARUVI_SITE_URL` (site URL)
-   - `TARUVI_API_KEY`
-   - `TARUVI_APP_SLUG`
-1. Open this repo when the hackathon starts:
-   - https://github.com/Taruvi-ai/taruvi-hacks-template
-2. Create a GitHub Codespace (first load is usually ~2.5 minutes).
-3. Open `.env`, paste your `TARUVI_SITE_URL`, `TARUVI_APP_SLUG`, and `TARUVI_API_KEY`, then save.
-
-## Codespaces Behavior (Important)
-
-When Codex starts in the devcontainer:
-- It verifies required Taruvi env vars are present.
-- If missing, it asks you to update `.env` with `TARUVI_SITE_URL`, `TARUVI_APP_SLUG`, and `TARUVI_API_KEY`.
-- It writes `.codex/config.toml` with resolved Taruvi values.
-- It attempts to install the Codex VS Code extension.
-- It launches Codex after setup is complete.
-
-## Updating Config Later
-
-If you change your Taruvi site, app slug, or API key later:
-1. Edit `.env`
-2. Update `TARUVI_SITE_URL`, `TARUVI_APP_SLUG`, or `TARUVI_API_KEY`
-3. Run `npm run codex:refresh`
-4. Restart Codex if needed
-
-## Security Notes
-
-- `OPENAI_API_KEY` is injected via GitHub Codespaces secrets and must **never be committed** to the repository.
-- If a key was ever committed accidentally, rotate/revoke it immediately in the OpenAI dashboard.
-
-## Local Commands
+## Getting started
 
 ```bash
-npm run dev
-npm run build
-npm run start
+npm install            # also installs the Taruvi skills (postinstall)
+npm run setup          # interactive: writes .env and .mcp.json
+npm run dev            # start the Refine dev server (http://localhost:5173)
 ```
 
-## Tech Stack
+`npm run setup` prompts for your Taruvi values and generates the config files. To
+set them by hand, copy `.env.example` → `.env` and `.mcp.example.json` →
+`.mcp.json`, then fill in:
 
-- [Refine](https://refine.dev)
-- React + TypeScript
-- MUI
-- Taruvi Providers + Taruvi MCP integration
+```env
+TARUVI_SITE_URL=https://<tenant>.taruvi.cloud
+TARUVI_API_KEY=<your-api-key>
+TARUVI_APP_SLUG=<your-app-slug>
+```
 
-## Learn More
+Create your app and collect these values in the Taruvi Console first.
 
-- [Refine Docs](https://refine.dev/docs)
-- [Refine Data Provider Docs](https://refine.dev/docs/core/providers/data-provider/#overview)
-- [Refine MUI Docs](https://refine.dev/docs/ui-frameworks/mui/tutorial/)
+## Working with AI agents
+
+- **Any agent/IDE:** start from [`AGENTS.md`](AGENTS.md) — shared rules, preflights,
+  Refine v5 + Taruvi specifics, deployment.
+- **Claude Code:** [`CLAUDE.md`](CLAUDE.md) adds a coordinator model that delegates
+  to the `taruvi-backend`, `taruvi-frontend`, and `ui-ux-reviewer` subagents.
+- **Design system:** [`UI_Guidelines.md`](UI_Guidelines.md) + `taruviTokens` from
+  [`themeOptions.ts`](themeOptions.ts).
+
+Skills are fetched fresh (latest) into `.agents/skills/` on every `npm install`, so
+they are not committed. Install/refresh manually with
+`npx skills add Taruvi-ai/taruvi-skills`.
+
+## Commands
+
+```bash
+npm run dev       # dev server
+npm run build     # production build
+npm run start     # serve the build
+npm run deploy    # build + upload dist/ to Taruvi frontend workers
+```
+
+## Tech stack
+
+[Refine](https://refine.dev) · React + TypeScript · MUI · Taruvi providers + MCP
 
 ## License
 

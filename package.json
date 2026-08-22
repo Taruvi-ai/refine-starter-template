@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "archiver": "^7.0.1",
     "@types/node": "^20",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
@@ -57,8 +58,8 @@
     "start": "refine start",
     "refine": "refine",
     "setup": "node setup-env.js",
-    "codex:refresh": "bash scripts/refresh-codex-config.sh",
-    "codex:start": "bash scripts/start-codex-devcontainer.sh"
+    "deploy": "node scripts/deploy.mjs",
+    "postinstall": "node scripts/generate-codex-agents.mjs; (npx -y skills add Taruvi-ai/taruvi-skills --skill '*' --agent claude-code codex kiro-cli -y 2>/dev/null) || echo \"[skills] fetch skipped (offline or CLI unavailable) — run 'npx skills add Taruvi-ai/taruvi-skills' manually\""
   },
   "browserslist": {
     "production": [
