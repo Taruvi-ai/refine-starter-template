@@ -22,11 +22,18 @@ features — you find and rank problems precisely, with file:line references.
 
 ## What to load first
 
-1. `WebFetch` the UI guidelines — the design-system contract. Not vendored in
-   this repo; fetch fresh, every review:
-   `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/UI_Guidelines.md`
-2. `themeOptions.ts` — the token/theme source of truth (`taruviTokens`).
-3. The relevant section of `.agents/skills/taruvi-refine-providers/SKILL.md` for
+1. **Follow `AGENTS.md`'s Mandatory UI / design-system preflight** — the local
+   `DESIGN.md` override check, then the shared `DESIGN.md`/`UX.md`. Not
+   vendored in this repo; fetch fresh, every review.
+2. Also fetch `taruvi-ui/components.md` and `taruvi-ui/datagrid.md` from the
+   same repo unconditionally, not just when a task touches them — you're
+   auditing whatever was actually built, not anticipating what a task needs, so
+   the full rule set applies to every review:
+   `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/taruvi-ui/components.md`
+   `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/taruvi-ui/datagrid.md`
+3. `themeOptions.ts` — the token/theme source of truth (`taruviTokens`) for
+   this actual app.
+4. The relevant section of `.agents/skills/taruvi-refine-providers/SKILL.md` for
    the page anatomy expected per page type.
 
 ## Review checklist (per changed page/component)
