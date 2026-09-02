@@ -3,20 +3,22 @@ import { ThemeOptions } from "@mui/material/styles";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 
 /**
- * Taruvi Design System — MUI Theme
- * Source of truth: taruvi-design-system.html
+ * Generic Starter Theme — MUI Theme
  *
- * Every numeric value below is taken DIRECTLY from the design system
- * (font sizes, weights, paddings, radii, shadows, letter-spacings).
+ * A brand-neutral MUI theme built from MUI's own shipped palette values
+ * (`@mui/material/colors`) rather than a specific product's brand colors.
+ * Treat this file as a reference implementation: the token shape
+ * (`taruviTokens`) and the two exported `ThemeOptions` objects are the
+ * contract other apps compare their own theme against — fork this file,
+ * swap the *values* for your brand, keep the *shape*.
  *
- * Note on radii: the `radius.*` block intentionally runs ~50% softer than
- * the raw design-system values (see comments inside the block). Other
- * tokens stay faithful to the spec.
+ * Note on radii: the `radius.*` ladder is built around MUI's own actual
+ * default `shape.borderRadius` (4px) — see comments inside the block.
  */
 
 // ─── Module augmentation: custom MUI variants ────────────────────────
-// Adds 4 category/tag chip variants that match the design system's
-// pastel rotation palette. Usage: `<Chip variant="tagBlue" label="…" />`
+// Adds 8 category/tag chip variants backed by a generic pastel rotation.
+// Usage: `<Chip variant="tagBlue" label="…" />`
 declare module "@mui/material/Chip" {
   interface ChipPropsVariantOverrides {
     tagBlue: true;
@@ -31,194 +33,218 @@ declare module "@mui/material/Chip" {
 }
 
 // ─── Font families ──────────────────────────────────────────────────
-const FONT_BODY = "'Open Sans', sans-serif";
-const FONT_TITLE = "'Quicksand', sans-serif";
+// A single generic stack for both body and heading text — MUI's own
+// default font family, with standard system fallbacks. `font.body` /
+// `font.title` are kept as two separate tokens (and threaded through
+// `typography` below as `FONT_BODY` / `FONT_TITLE`) so a fork that wants a
+// distinct display face for headings only has to change `FONT_TITLE`.
+const FONT_BODY = '"Roboto", "Helvetica", "Arial", sans-serif';
+const FONT_TITLE = FONT_BODY;
 
 // Primary accent hex, hoisted so `button.primaryDefault` and the focus-ring
-// shadow token can never drift apart. Measured: 3.68:1 on white paper,
-// 3.34:1 on the page background, 3.32:1 on the input fill, 4.04–5.03:1 on the
-// dark surfaces — above the 3:1 WCAG 1.4.11 floor for a *non-text* focus
-// indicator, but below the 4.5:1 text floor, which is why text-bearing
-// surfaces use `button.primaryFill` instead.
-const PRIMARY_ACCENT = '#1E88E5';
+// shadow token can never drift apart. This is MUI's own default primary
+// color (`@mui/material/colors` `blue[600]`). White text on it is ~3.7:1 —
+// above the 3:1 WCAG 1.4.11 floor for a *non-text* focus indicator, but
+// below the 4.5:1 text floor, which is why text-bearing surfaces use
+// `button.primaryFill` (`blue[700]`, ~4.6:1) instead.
+const PRIMARY_ACCENT = '#1e88e5';
 
-// ─── Brand tokens (full ramps + every named color from the spec) ────
+// ─── Generic tokens (full ramps + every named color role) ────────────
 export const taruviTokens = {
   font: {
     body: FONT_BODY,
     title: FONT_TITLE,
   },
 
+  // `@mui/material/colors` `blue` ramp (50–900). `dark` is one step below
+  // 900, for surfaces (dark-mode contrast text) that need something darker
+  // than the ramp itself provides.
   primary: {
-    50: '#F2FBFF',
-    100: '#E0F6FE',
-    200: '#C6EFFD',
-    300: '#9DE5FD',
-    400: '#6ED8FB',
-    500: '#3EC7F5',
-    600: '#0A93C4',
-    700: '#1AB3E6',
-    800: '#056A8F',
-    900: '#003652',
-    dark: '#002A3C',
+    50: '#e3f2fd',
+    100: '#bbdefb',
+    200: '#90caf9',
+    300: '#64b5f6',
+    400: '#42a5f5',
+    500: '#2196f3',
+    600: '#1e88e5',
+    700: '#1976d2',
+    800: '#1565c0',
+    900: '#0d47a1',
+    dark: '#08213d',
   },
 
+  // `@mui/material/colors` `grey` ramp. `darkest` is MUI's own actual
+  // default dark-mode `background.default` (`#121212`).
   neutral: {
-    50: '#FAFAFA',
-    100: '#F4F5F5',
-    200: '#E9EBEC',
-    300: '#C9CECF',
-    400: '#B8BFC1',
-    500: '#929C9F',
-    600: '#7E8A8D',
-    700: '#596365',
-    800: '#363B3D',
-    900: '#121414',
-    darkest: '#00090B',
+    50: '#fafafa',
+    100: '#f5f5f5',
+    200: '#eeeeee',
+    300: '#e0e0e0',
+    400: '#bdbdbd',
+    500: '#9e9e9e',
+    600: '#757575',
+    700: '#616161',
+    800: '#424242',
+    900: '#212121',
+    darkest: '#121212',
   },
 
+  // `@mui/material/colors` `purple` ramp — a generic secondary that reads
+  // clearly distinct from primary blue. These exact steps (300/500/700)
+  // are also what MUI's own `createTheme()` uses for its default
+  // `palette.secondary` light/main/dark.
   secondary: {
-    50: '#E6F0F5',
-    100: '#BFDAE8',
-    200: '#99C4DB',
-    300: '#73ADCE',
-    400: '#4D97C1',
-    500: '#2680B4',
-    600: '#00699A',
-    700: '#004369',
-    800: '#03435B',
-    900: '#002A3C',
+    50: '#f3e5f5',
+    100: '#e1bee7',
+    200: '#ce93d8',
+    300: '#ba68c8',
+    400: '#ab47bc',
+    500: '#9c27b0',
+    600: '#8e24aa',
+    700: '#7b1fa2',
+    800: '#6a1b9a',
+    900: '#4a148c',
   },
 
+  // `@mui/material/colors` `green` ramp.
   success: {
-    50: '#e6f4ef',
-    100: '#c1e6d8',
-    200: '#9ad7c0',
+    50: '#e8f5e9',
+    100: '#c8e6c9',
+    200: '#a5d6a7',
     300: '#81c784',
-    400: '#4caf50',
-    500: '#10B981',
-    600: '#0a7d5a',
-    700: '#047857',
-    800: '#065f46',
-    900: '#064e3b',
+    400: '#66bb6a',
+    500: '#4caf50',
+    600: '#43a047',
+    700: '#388e3c',
+    800: '#2e7d32',
+    900: '#1b5e20',
   },
 
+  // `@mui/material/colors` `orange` ramp for 50–700. `800` swaps to
+  // `deepOrange[900]` (`#bf360c`) rather than continuing the orange ramp:
+  // orange's own darkest step (`orange[900]`, `#e65100`) still measures
+  // under 3.8:1 as text on a light surface, short of the 4.5:1 floor;
+  // `deepOrange[900]` clears ~5.1–5.6:1 on the same surfaces. This is the
+  // one ramp where a role needs a genuinely dark shade the family itself
+  // doesn't reach.
   warning: {
-    50: '#fff8e1',
-    100: '#ffecb3',
-    200: '#ffd54f',
-    300: '#ffca28',
-    400: '#f59e0b',
-    500: '#f57c00',
-    600: '#ef6c00',
-    700: '#e65100',
+    50: '#fff3e0',
+    100: '#ffe0b2',
+    200: '#ffcc80',
+    300: '#ffb74d',
+    400: '#ffa726',
+    500: '#ff9800',
+    600: '#fb8c00',
+    700: '#f57c00',
     800: '#bf360c',
   },
 
+  // `@mui/material/colors` `red` ramp.
   error: {
-    50: '#fce4ec',
-    100: '#f8bbd0',
-    200: '#f48fb1',
-    300: '#f06292',
-    400: '#ec407a',
-    500: '#d81b60',
-    600: '#c2185b',
-    700: '#ad1457',
-    800: '#880e4f',
-    900: '#560027',
+    50: '#ffebee',
+    100: '#ffcdd2',
+    200: '#ef9a9a',
+    300: '#e57373',
+    400: '#ef5350',
+    500: '#f44336',
+    600: '#e53935',
+    700: '#d32f2f',
+    800: '#c62828',
+    900: '#b71c1c',
   },
 
-  // Primary button states (filled blue button system)
+  // Primary button states, derived from the blue ramp above. `primaryFill`/
+  // `primaryHover`/`primaryActive` step down the ramp (700→800→900) so a
+  // white label stays ≥4.5:1 (WCAG 1.4.3) at every state; `primaryDefault`
+  // stays the flatter 600 for non-text uses (focus rings, borders, tab
+  // indicator, checkbox/switch fills) where 3:1 is the bar. This 3-role
+  // split exists because a single mid-ramp blue can't be both a passable
+  // *fill* for white text (needs ≥4.5:1) and a light-enough *accent* for
+  // borders/rings that still reads as "the brand blue" rather than navy —
+  // splitting the role in two lets each pick the shade that actually fits.
   button: {
-    primaryDefault: PRIMARY_ACCENT,
-    // AA fill/foreground for *text-bearing* primary surfaces. White on
-    // #1E88E5 is only 3.68:1 (WCAG 1.4.3 wants 4.5:1); white on #1976d2 is
-    // 4.60:1. Same value as `status.inProgress` — the design system's chip /
-    // link blue — exposed here under a button-semantic name. `primaryDefault`
-    // stays the brand accent for non-text uses (focus rings, borders, the tab
-    // indicator, checkbox/switch fills) where 3:1 is the bar.
-    primaryFill: '#1976d2',
-    primaryHover: '#1565C0',
-    primaryActive: '#0D47A1',
-    primaryDisabled: '#BBDEFB',
-    primaryDisabledText: '#999999',
+    primaryDefault: PRIMARY_ACCENT,      // blue[600] — non-text, ~3.7:1
+    primaryFill: '#1976d2',              // blue[700] — white text ~4.6:1
+    primaryHover: '#1565c0',             // blue[800] — white text ~5.75:1
+    primaryActive: '#0d47a1',            // blue[900] — white text ~8.6:1
+    primaryDisabled: '#bbdefb',          // blue[100]
+    primaryDisabledText: '#757575',      // grey[600] — disabled text is WCAG-exempt, kept legible anyway
   },
 
-  // Status / chart colors
+  // Status / chart colors — a generic placeholder rotation, not a designed
+  // system. The four common status tones (todo / inProgress / review /
+  // complete) reuse MUI's own neutral/info/warning/success semantics; the
+  // rest are secondary tones for less common states. Swap these for your
+  // product's own status vocabulary.
   status: {
-    complete: '#388e3c',
-    // `complete` carries a white chip label at only 4.12:1. `completeChip` is
-    // the AA fill for filled success chips and the success-alert accent
-    // (white on #2e7d32 = 5.13:1; #2e7d32 on the success-alert tint = 4.53:1).
-    // Same Material green family, one step darker. Keep `complete` for
-    // non-text uses (chart marks, borders).
-    completeChip: '#2e7d32',
-    inProgress: '#1976d2',
-    review: '#f57c00',
-    delayed: '#c2185b',
-    onHold: '#7b1fa2',
-    todo: '#00acc1',
-    open: '#19b3e5',
-    resolved: '#008751',
-    underReview: '#FF8C00',
-    delayedAlt: '#C71585',
-    onHoldAlt: '#8B1A72',
-    chartPrimary: '#1e88f5',
+    complete: '#388e3c',       // green[700]
+    completeChip: '#2e7d32',   // green[800] — AA white-label fill for filled success chips (white text ~5.13:1)
+    inProgress: '#1976d2',     // blue[700] — white text ~4.6:1
+    review: '#f57c00',         // orange[700] — white text is only ~2.7:1, so chips/alerts on this fill use dark text instead (see MuiChip.colorWarning below)
+    delayed: '#d32f2f',        // red[700]
+    onHold: '#7b1fa2',         // purple[700]
+    todo: '#9e9e9e',           // grey[500]
+    open: '#1e88e5',           // blue[600]
+    resolved: '#1b5e20',       // green[900]
+    underReview: '#ef6c00',    // orange[800]
+    delayedAlt: '#b71c1c',     // red[900]
+    onHoldAlt: '#4a148c',      // purple[900]
+    chartPrimary: '#1e88e5',   // blue[600]
   },
 
   // Tag / category chips
   //
-  // The design system uses a **pastel rotation palette** for category chips
-  // (pastel fill + same-hue dark label). Extended from 4 to 8 entries so a
-  // tenant with more than four categories can still give each one a distinct
-  // preset. Also exposed as MuiChip variants `tagBlue`/`tagPurple`/`tagGreen`/
+  // Also exposed as MuiChip variants `tagBlue`/`tagPurple`/`tagGreen`/
   // `tagOrange`/`tagTeal`/`tagPink`/`tagLime`/`tagRose` — prefer those over
-  // reading raw values. Index order here matches that variant order, and
-  // entries 0–3 keep their original values so any colour already assigned to
-  // a category stays put.
+  // reading raw values.
   tag: {
-    fillBg: '#E0F6FE',     // legacy single-fill (kept for backward compat)
-    fillText: '#004369',
+    fillBg: '#e3f2fd',     // legacy single-fill (kept for backward compat)
+    fillText: '#0d47a1',
     outlineColor: '#1976d2',
   },
-  // Every pair is ≥4.5:1 label-on-fill (measured, WCAG 1.4.3), the fills are
-  // all L*93–96 / C*8–16 so the set reads as one family, and the minimum
-  // pairwise CIEDE2000 between any two fills is 7.5 (tagPurple↔tagPink) —
-  // comfortably above the ~2.3 just-noticeable threshold. Every fill is ≥24
-  // ΔE2000 from every saturated `status.*` chip tone, so a category chip can't
-  // be mistaken for a status chip. Entries 4–7 were placed at the four widest
-  // gaps in the original four's Lab hue circle (h110 / h190 / h330 / h35).
+  // Each pair takes one MUI color family's lightest (50/100) fill with a
+  // dark (800/900) shade of the same or a compatible family as the label.
+  // A 50-vs-900 pairing clears 4.5:1 comfortably in every MUI family
+  // because the lightness gap is so large — this is a plain, defensible
+  // pattern for a starter template, not a luminance-matched, CIEDE2000-
+  // engineered system the way a shipping product's tag palette would be.
+  // If your app leans on tag color meaningfully (e.g. color carries
+  // information, not just decoration), replace these with values measured
+  // for your own palette. `tagLime` pairs `lime[50]` with `lightGreen[900]`
+  // rather than `lime[900]` — MUI's own darkest lime step (`#827717`)
+  // still falls just short of 4.5:1 on `lime[50]`.
   tagPalette: [
-    { bg: '#E0F6FE', text: '#004369' }, // blue   — 9.36:1
-    { bg: '#EDE7F6', text: '#4527A0' }, // purple — 8.47:1
-    { bg: '#E8F5E9', text: '#1B5E20' }, // green  — 7.00:1
-    { bg: '#FFF3E0', text: '#BF360C' }, // orange — 5.11:1 (was #E65100, only 3.46:1)
-    { bg: '#C8F7F3', text: '#00514D' }, // teal   — 7.90:1
-    { bg: '#FFE5FB', text: '#68315B' }, // pink   — 8.19:1
-    { bg: '#EFF0D1', text: '#41480E' }, // lime   — 8.37:1
-    { bg: '#FFE4DF', text: '#732F2C' }, // rose   — 8.02:1
+    { bg: '#e3f2fd', text: '#0d47a1' }, // blue
+    { bg: '#f3e5f5', text: '#4a148c' }, // purple
+    { bg: '#e8f5e9', text: '#1b5e20' }, // green
+    { bg: '#fff3e0', text: '#bf360c' }, // orange (deepOrange[900] label — see `warning` ramp note above)
+    { bg: '#e0f2f1', text: '#004d40' }, // teal
+    { bg: '#fce4ec', text: '#880e4f' }, // pink
+    { bg: '#f9fbe7', text: '#33691e' }, // lime (lightGreen[900] label)
+    { bg: '#ffebee', text: '#b71c1c' }, // rose (red)
   ],
 
   // Tab / surface tokens
   surface: {
-    bg: '#f3f4f6',
+    bg: '#f5f5f5',              // grey[100]
     paper: '#ffffff',
-    inputBg: '#F3F3F5',
+    inputBg: '#fafafa',         // grey[50]
     borderLight: 'rgba(0,0,0,0.08)',
     borderInput: 'rgba(0,0,0,0.1)',
     borderTableRow: 'rgba(0,0,0,0.04)',
-    navWhiteBorder: '#e5e7eb',
-    navBlue: '#2b97ff',
-    navDark: '#004369',
-    navDarkAccent: '#9de5fd',
-    navWhiteText: '#101828',
+    navWhiteBorder: '#e0e0e0',  // grey[300]
+    navBlue: '#1976d2',         // blue[700]
+    navDark: '#0d47a1',         // blue[900]
+    navDarkAccent: '#64b5f6',   // blue[300]
+    navWhiteText: '#212121',    // grey[900]
   },
 
-  // Text colors
+  // Text colors — MUI's own default light-mode text tokens (alpha-over-
+  // black), plus a flat `onDark` for dark surfaces.
   text: {
-    primary: '#121414',
-    secondary: '#596365',
-    muted: '#929C9F',
+    primary: 'rgba(0,0,0,0.87)',
+    secondary: 'rgba(0,0,0,0.6)',
+    muted: 'rgba(0,0,0,0.38)',
     onDark: '#ffffff',
   },
 
@@ -229,23 +255,26 @@ export const taruviTokens = {
     nav: '0 2px 8px rgba(0,0,0,0.12)',
     sidebar: '0 2px 8px rgba(0,0,0,0.08)',
     swatch: '0 1px 6px rgba(0,0,0,0.10)',
-    // 2px **solid** ring — design calls for "ring outline (2px, --ring-color)".
-    // It used to be rgba(30,136,229,0.35), which composited to 1.53:1 against
-    // white and 1.49:1 against the input fill: far under the 3:1 WCAG 1.4.11
-    // floor for a focus indicator. Solid measures 3.68:1 on paper, 3.34:1 on
-    // the page background, 3.32:1 on the input fill, and 4.04–5.03:1 on the
-    // dark surfaces.
+    // 2px **solid** ring, not a translucent one — a solid ring measures
+    // well above the 3:1 WCAG 1.4.11 floor for a non-text focus indicator
+    // on both light and dark surfaces; a semi-transparent ring at low
+    // alpha typically doesn't.
     focusRing: `0 0 0 2px ${PRIMARY_ACCENT}`,
   },
 
-  // Border radii (toned down ~50% from the design-system defaults)
+  // Border radii — a light ladder built around MUI's own actual default
+  // `shape.borderRadius` (4px), used here as `radius.md`. Smaller,
+  // denser components (tooltips) sit below it; larger containers (cards)
+  // sit above it. This is a generic "small things are tighter, big things
+  // are looser" convention, not a brand-specific spec — an app that wants
+  // a flatter or rounder look can collapse the whole ladder to one value.
   radius: {
     none: 0,
-    sm: 3,    // tooltip                          (orig 6)
-    md: 4,    // buttons, icon-button, sidebar    (orig 8)
-    lg: 6,    // form inputs, status messages     (orig 10)
-    xl: 8,    // navbars, sidebar containers      (orig 12)
-    xxl: 10,  // cards, TOC                       (orig 16)
+    sm: 2,     // tooltip
+    md: 4,     // buttons, icon-button, sidebar — MUI's own default
+    lg: 8,     // form inputs, status messages
+    xl: 12,    // navbars, sidebar containers
+    xxl: 16,   // cards, TOC
     pill: 999,
     avatar: 9999,
   },
@@ -260,12 +289,12 @@ export const taruviTokens = {
     formGroupMb: 18,
     formActionsMt: 24,
     formActionsGap: 10,
-    // Design spec: form vertical rhythm
+    // Form vertical rhythm
     formLabelToInput: 8,    // gap between label and input
     formInputToHelper: 4,   // gap between input and helper / error text
     formFieldGap: 16,       // gap between adjacent fields in a stack
     formSectionGap: 32,     // gap between form sections
-    // Design spec: input padding 12×16 (pairs with 40px standard input height)
+    // Input padding (pairs with the 40px standard input height below)
     inputPaddingY: 12,
     inputPaddingX: 16,
     btnSm: '6px 14px',
@@ -340,7 +369,7 @@ export const taruviTokens = {
     label: '0.75rem',  // 12px
     footer: '0.6875rem', // 11px
     formLabel: '0.8125rem',  // 13px
-    formInput: '1rem',       // 16px — design spec (also prevents iOS Safari from zooming on focus)
+    formInput: '1rem',       // 16px — also prevents iOS Safari from zooming on focus
     formHelper: '0.6875rem', // 11px
     btnSm: '0.6875rem',  // 11px
     btnMd: '0.8125rem',  // 13px
@@ -354,18 +383,19 @@ export const taruviTokens = {
   },
 } as const;
 
-// ─── Typography (precise design system spec) ────────────────────────
+// ─── Typography ────────────────────────────────────────────────────
 const typography: ThemeOptions['typography'] = {
   fontSize: 13, // base for MUI's rem calculations (matches body p3)
   fontFamily: FONT_BODY,
   htmlFontSize: 16,
 
-  // Headings — Quicksand. Spec gives semi-bold (600) and bold/extra-bold variants;
-  // we use the heavier of the pair so headings read with brand weight.
+  // Headings use a bold weight so they read with clear hierarchy against
+  // body text, capped at 700 (standard "bold") rather than a heavier
+  // weight that depends on a display face actually being loaded.
   h1: {
     fontFamily: FONT_TITLE,
     fontSize: taruviTokens.fontSize.h1,         // 36px
-    fontWeight: 800,                            // extra-bold
+    fontWeight: 700,
     lineHeight: taruviTokens.lineHeight.heading,
     letterSpacing: '-0.01em',
   },
@@ -400,7 +430,7 @@ const typography: ThemeOptions['typography'] = {
     lineHeight: taruviTokens.lineHeight.h5,
   },
 
-  // Body sizes (Open Sans)
+  // Body sizes
   body1: {
     fontFamily: FONT_BODY,
     fontSize: taruviTokens.fontSize.p2,        // 14px
@@ -412,7 +442,7 @@ const typography: ThemeOptions['typography'] = {
     lineHeight: taruviTokens.lineHeight.body,
   },
 
-  // Subtitles ≈ Quicksand subheading rules
+  // Subtitles
   subtitle1: {
     fontFamily: FONT_TITLE,
     fontSize: '0.875rem',                       // 14px
@@ -428,7 +458,10 @@ const typography: ThemeOptions['typography'] = {
     textTransform: 'uppercase',
   },
 
-  // Buttons — Quicksand uppercase 700, 0.04em
+  // Buttons — uppercase, bold, lightly tracked out. Uppercase + letter-
+  // spacing here is a common MUI convention (it's literally MUI's own
+  // default `typography.button.textTransform`), not a brand-specific
+  // choice.
   button: {
     fontFamily: FONT_TITLE,
     fontSize: taruviTokens.fontSize.btnMd,      // 13px
@@ -452,7 +485,7 @@ const typography: ThemeOptions['typography'] = {
   },
 };
 
-const shape = { borderRadius: taruviTokens.radius.md }; // 8px default
+const shape = { borderRadius: taruviTokens.radius.md }; // 4px — MUI's own default
 const spacing = 8;
 
 // ─── Component overrides (every spec'd surface) ─────────────────────
@@ -460,52 +493,51 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
   const isLight = mode === 'light';
   const dividerColor = isLight ? taruviTokens.surface.borderLight : 'rgba(255,255,255,0.08)';
 
-  // The accent used as a *foreground* (link text, text/outlined button labels,
-  // selected tab, focused field label). `button.primaryDefault` is only
-  // 3.68:1 on white — fine for a 2px ring (1.4.11 → 3:1), short of the 4.5:1
-  // text floor (1.4.3).
+  // The accent used as a *foreground* (link text, text/outlined button
+  // labels, selected tab, focused field label). `button.primaryDefault` is
+  // only ~3.7:1 on white — fine for a 2px ring (1.4.11 → 3:1), short of the
+  // 4.5:1 text floor (1.4.3), so foreground text uses a darker step of the
+  // ramp instead.
   //
-  // Light uses `button.primaryHover` (#1565C0), not `primaryFill` (#1976d2).
-  // #1976d2 clears 4.5:1 only on paper (4.60:1) and drops to 4.18:1 on
-  // `background.default` and 4.39:1 on a hovered `primary[50]` row — and this
-  // app puts blue foregrounds on exactly those surfaces (chart-legend links,
-  // the ticket-number column and other in-row links, mailto/tel links). A tone
-  // that passes only on paper is a latent failure that returns the moment
-  // someone hovers a row. #1565C0 measures 5.75 paper / 5.22 page bg / 5.48
-  // hovered row / 5.14 primary[100] — uniformly passing, no per-surface caveat.
-  // `primaryFill` stays the AA *fill* for white-on-blue (contained buttons,
-  // `palette.primary.main`); this is its foreground counterpart.
+  // Light uses `primary[900]` (`primaryActive`, `#0d47a1`): it clears
+  // ≥6:1 on every surface a link/label actually lands on in this theme —
+  // paper, the page background, a hovered `primary[50]` row, and even the
+  // `primary[100]` chip/badge fill — where a lighter step (e.g. `blue[800]`)
+  // starts dropping close to 4:1 on some of those.
   //
-  // Dark needs a light tone — `primary[300]` is 11.92:1 on the dark card,
-  // 13.27:1 on the dark page background, 10.85:1 on a hovered row.
-  const accentFg = isLight ? taruviTokens.button.primaryHover : taruviTokens.primary[300];
-  // Hover/active step for that accent: darker in light, lighter in dark, so the
-  // label keeps ≥4.5:1 over the tinted hover fill — measured 7.45–8.23:1 in
-  // light, 11.00:1 in dark. (Colour alone is a weak state signal at this step;
-  // the hover affordance is `MuiLink`'s underline and the buttons' tint fill.)
-  const accentFgHover = isLight ? taruviTokens.button.primaryActive : taruviTokens.primary[200];
-  const accentTintHover = isLight ? '#e3f0fb' : 'rgba(30,136,229,0.16)';
+  // Dark needs a light tone — `primary[300]` measures ~7.5:1 on the dark
+  // card and ~8.5:1 on the dark page background.
+  const accentFg = isLight ? taruviTokens.button.primaryActive : taruviTokens.primary[300];
+  // Hover/active step for that accent: darker still in light, lighter in
+  // dark, so the label keeps well above 4.5:1 over the tinted hover fill.
+  // (Color alone is a weak state signal at this step; the hover affordance
+  // is `MuiLink`'s underline and the buttons' tint fill.)
+  const accentFgHover = isLight ? taruviTokens.primary.dark : taruviTokens.primary[200];
+  const accentTintHover = isLight ? taruviTokens.primary[50] : 'rgba(30,136,229,0.16)';
 
   // Chip label tones for the **outlined** variant. A filled chip puts the
-  // design-system tone in the background behind a white/dark label; an
-  // outlined chip puts that tone *on the label*, so it has to clear the 4.5:1
-  // text floor against every surface a chip can land on — paper, the page
-  // background, and the `primary[50]` hover/selected row fill. Worst-case
-  // measurements are in the comments; the lowest of the eight is 4.66:1.
+  // status tone in the background behind a white/dark label; an outlined
+  // chip puts that tone *on the label*, so it has to clear the 4.5:1 text
+  // floor against every surface a chip can land on — paper, the page
+  // background, and the `primary[50]` hover/selected row fill. These clear
+  // ≥4.3:1 on paper and the page background; a hovered primary-tinted row
+  // nudges a couple of them (success, error) a hair under 4.5:1 in that
+  // specific compound state — acceptable for a starter placeholder, worth
+  // re-checking with a contrast tool if you tune these hues.
   const outlinedChipFg = isLight
     ? {
-        primary: taruviTokens.button.primaryHover, // 5.75 / 5.22 / 5.48
-        success: taruviTokens.status.completeChip, // 5.13 paper / 4.66 page bg / 4.89 row
-        info: taruviTokens.button.primaryHover,    // 5.75 / 5.22 / 5.48 — status.inProgress is only 4.18 on the page bg
-        warning: taruviTokens.warning[800],        // 5.60 / 5.09 / 5.34
-        error: taruviTokens.error[600],            // 5.87 / 5.34 / 5.60
+        primary: taruviTokens.button.primaryActive, // blue[900]
+        success: taruviTokens.status.completeChip,  // green[800]
+        info: taruviTokens.button.primaryActive,     // blue[900]
+        warning: taruviTokens.warning[800],          // deepOrange[900]
+        error: taruviTokens.error[700],              // red[700]
       }
     : {
-        primary: taruviTokens.primary[300],  // 11.92 / 10.30
-        success: taruviTokens.success[300],  // 8.26 dark paper / 7.14 dark selected row
-        info: taruviTokens.primary[300],     // 11.92 / 10.30
-        warning: taruviTokens.warning[300],  // 10.86 / 9.39
-        error: taruviTokens.error[300],      // 5.43 / 4.70
+        primary: taruviTokens.primary[300],
+        success: taruviTokens.success[300],
+        info: taruviTokens.primary[300],
+        warning: taruviTokens.warning[300],
+        error: taruviTokens.error[300],
       };
 
   return {
@@ -517,8 +549,8 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           MozOsxFontSmoothing: 'grayscale',
         },
         body: {
-          backgroundColor: isLight ? taruviTokens.surface.bg : '#0b1518',
-          color: isLight ? taruviTokens.text.primary : '#f8fafc',
+          backgroundColor: isLight ? taruviTokens.surface.bg : taruviTokens.neutral.darkest,
+          color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
           fontFamily: FONT_BODY,
           fontSize: taruviTokens.fontSize.p3,
           lineHeight: taruviTokens.lineHeight.body,
@@ -533,7 +565,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       defaultProps: { disableElevation: true, variant: 'contained', disableRipple: false },
       styleOverrides: {
         root: {
-          borderRadius: taruviTokens.radius.md,           // 8px (toned via radius block)
+          borderRadius: taruviTokens.radius.md,
           fontFamily: FONT_TITLE,
           fontWeight: 700,
           letterSpacing: taruviTokens.letterSpacing.button,
@@ -541,7 +573,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           boxShadow: 'none',
           transition: taruviTokens.transition.base,
           gap: 6,
-          // Design spec: 44px min touch target on coarse pointers (mobile/tablet) — WCAG 2.5.5
+          // 44px min touch target on coarse pointers (mobile/tablet) — WCAG 2.5.5
           '@media (pointer: coarse)': {
             minHeight: 44,
           },
@@ -562,8 +594,9 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           minHeight: taruviTokens.size.btnLgMinH,
         },
         containedPrimary: {
-          // `primaryFill`, not `primaryDefault`: white on #1E88E5 is 3.68:1,
-          // white on #1976d2 is 4.60:1 (WCAG 1.4.3). Hover 5.75:1, active 8.63:1.
+          // `primaryFill`, not `primaryDefault`: white on blue[600] is only
+          // ~3.7:1, white on blue[700] is ~4.6:1 (WCAG 1.4.3). Hover ~5.75:1,
+          // active ~8.6:1.
           backgroundColor: taruviTokens.button.primaryFill,
           color: '#fff',
           '&:hover': { backgroundColor: taruviTokens.button.primaryHover, boxShadow: 'none' },
@@ -580,21 +613,23 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           '&:hover': {
             borderWidth: 2,
             // The hover tint has to stay mode-aware, otherwise the dark-mode
-            // label (`primary[300]`) lands on a near-white fill at 1.20:1.
+            // label (`primary[300]`) lands on a near-white fill at ~1.2:1.
             backgroundColor: accentTintHover,
             borderColor: accentFgHover,
             color: accentFgHover,
           },
         },
         containedError: {
-          backgroundColor: taruviTokens.error[600],
+          // `error[700]`, not `error[500]`: white on `error[500]` is only
+          // ~3.7:1. `error[700]` clears ~5.0:1.
+          backgroundColor: taruviTokens.error[700],
           color: '#fff',
           '&:hover': { backgroundColor: taruviTokens.error[800], boxShadow: 'none' },
         },
         outlinedError: {
           borderWidth: 2,
           borderColor: taruviTokens.error[600],
-          color: taruviTokens.error[600],
+          color: taruviTokens.error[700],
           '&:hover': {
             borderWidth: 2,
             backgroundColor: taruviTokens.error[50],
@@ -605,16 +640,16 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           color: accentFg,
           '&:hover': {
             backgroundColor: 'rgba(30,136,229,0.06)',
-            color: accentFgHover, // 5.37:1 on the light tint, 11.12:1 on the dark one
+            color: accentFgHover,
           },
         },
       },
     },
 
-    // ─ Icon button — 8px radius + design-system hover.
-    //   The design system's "Icon-Only Button" (38×38 with a 1.5px border)
-    //   is opt-in via className "btn-icon-only" so we don't bracket every
-    //   inline icon affordance in the codebase with a heavy border.
+    // ─ Icon button — square radius + a subtle hover fill.
+    //   The bordered "icon-only" treatment is opt-in via className
+    //   "btn-icon-only" so it doesn't bracket every inline icon affordance
+    //   in the codebase with a heavy border.
     MuiIconButton: {
       styleOverrides: {
         root: {
@@ -632,11 +667,11 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           },
         },
         sizeSmall: { padding: 4 },
-        colorError: { color: taruviTokens.error[600] },
+        colorError: { color: taruviTokens.error[700] },
       },
     },
 
-    // ─ Chips (pill, Quicksand 700 uppercase, 0.06em)
+    // ─ Chips (pill, bold uppercase)
     MuiChip: {
       styleOverrides: {
         root: {
@@ -656,39 +691,38 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         },
         outlined: { borderWidth: 1.5 },
         label: { paddingLeft: 8, paddingRight: 8 },
-        // Color variants line up with MUI's color="success"/etc. These are the
-        // **filled** treatments; the `variants` block below re-states the
-        // outlined ones, because a `colorX` styleOverride also lands on
-        // outlined chips (MUI's overridesResolver emits `color${Color}` before
-        // `${variant}${Color}`) and would otherwise paint an outlined chip with
-        // a fill it was never designed to carry.
+        // Color variants line up with MUI's color="success"/etc. These are
+        // the **filled** treatments; the `variants` block below re-states
+        // the outlined ones, because a `colorX` styleOverride also lands on
+        // outlined chips (MUI's overridesResolver emits `color${Color}`
+        // before `${variant}${Color}`) and would otherwise paint an
+        // outlined chip with a fill it was never designed to carry.
         colorSuccess: {
-          // white on `status.complete` #388e3c is 4.12:1 at the 11px chip label
-          // size; `completeChip` #2e7d32 takes it to 5.13:1 (WCAG 1.4.3).
+          // white on `status.complete` (green[700]) is ~4.12:1 at the 11px
+          // chip label size; `completeChip` (green[800]) takes it to
+          // ~5.13:1 (WCAG 1.4.3).
           backgroundColor: taruviTokens.status.completeChip,
           color: '#fff',
         },
-        colorInfo: { backgroundColor: taruviTokens.status.inProgress, color: '#fff' }, // 4.60:1
+        colorInfo: { backgroundColor: taruviTokens.status.inProgress, color: '#fff' }, // ~4.6:1
         colorWarning: {
           backgroundColor: taruviTokens.status.review,
-          // Dark label on the orange fill: white on #f57c00 is 2.70:1, whereas
-          // `text.primary` on it is 6.84:1. This is the fix UI_Guidelines §3
-          // prescribed for this token ("use dark text on that fill").
+          // Dark label on the orange fill: white on this fill is only
+          // ~2.7:1, while near-black text clears it comfortably — the same
+          // fix pattern MuiAlert's `standardWarning` below uses.
           color: taruviTokens.text.primary,
           '& .MuiChip-deleteIcon': { color: taruviTokens.text.primary },
         },
-        colorError: { backgroundColor: taruviTokens.error[600], color: '#fff' }, // 5.87:1
+        colorError: { backgroundColor: taruviTokens.error[700], color: '#fff' }, // ~5.0:1
       },
-      // `theme.components.MuiChip.variants` is resolved *after* `styleOverrides`,
-      // so these win over the `colorX` fills above — that ordering is what makes
-      // the outlined entries effective.
+      // `theme.components.MuiChip.variants` is resolved *after*
+      // `styleOverrides`, so these win over the `colorX` fills above — that
+      // ordering is what makes the outlined entries effective.
       variants: [
-        // Outlined chips (priority chips — UI_Guidelines §2): transparent fill,
-        // the tone moves onto the label and border, mode-aware so it clears
-        // 4.5:1 in both themes. See `outlinedChipFg` for the measurements.
+        // Outlined chips: transparent fill, the tone moves onto the label
+        // and border, mode-aware so it clears 4.5:1 in both themes. See
+        // `outlinedChipFg` above for the reasoning.
         {
-          // The active-filter chip row (§4.1) is `variant="outlined" color="primary"`
-          // and often sits on the page background, where `primary.main` is 4.18:1.
           props: { variant: 'outlined' as const, color: 'primary' as const },
           style: { backgroundColor: 'transparent', color: outlinedChipFg.primary, borderColor: outlinedChipFg.primary },
         },
@@ -708,11 +742,11 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           props: { variant: 'outlined' as const, color: 'error' as const },
           style: { backgroundColor: 'transparent', color: outlinedChipFg.error, borderColor: outlinedChipFg.error },
         },
-        // Tag-chip rotation palette (UI_Guidelines §2) — pastel fill + same-hue
-        // dark label, 8 entries. Pick one explicitly (`variant="tagBlue"`) or
-        // hash the tag name to an index for deterministic per-name assignment
-        // (a small `tagVariant()` helper). Values and their measured label
-        // contrast live in `taruviTokens.tagPalette`.
+        // Tag-chip rotation palette — pastel fill + same-family dark label,
+        // 8 entries. Pick one explicitly (`variant="tagBlue"`) or hash the
+        // tag name to an index for deterministic per-name assignment (a
+        // small `tagVariant()` helper). Values live in
+        // `taruviTokens.tagPalette`.
         { props: { variant: 'tagBlue' as const },   style: { backgroundColor: taruviTokens.tagPalette[0].bg, color: taruviTokens.tagPalette[0].text, textTransform: 'none' } },
         { props: { variant: 'tagPurple' as const }, style: { backgroundColor: taruviTokens.tagPalette[1].bg, color: taruviTokens.tagPalette[1].text, textTransform: 'none' } },
         { props: { variant: 'tagGreen' as const },  style: { backgroundColor: taruviTokens.tagPalette[2].bg, color: taruviTokens.tagPalette[2].text, textTransform: 'none' } },
@@ -724,7 +758,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       ],
     },
 
-    // ─ Cards (16px radius, 28px padding, soft shadow)
+    // ─ Cards
     MuiCard: {
       defaultProps: { elevation: 0 },
       styleOverrides: {
@@ -733,7 +767,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           padding: taruviTokens.spacing.cardPadding,    // 28px
           boxShadow: isLight ? taruviTokens.shadow.card : taruviTokens.shadow.cardDark,
           backgroundImage: 'none',
-          backgroundColor: isLight ? taruviTokens.surface.paper : '#11202a',
+          backgroundColor: isLight ? taruviTokens.surface.paper : '#1e1e1e',
         },
       },
     },
@@ -772,10 +806,10 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: taruviTokens.radius.lg,        // 10px
+          borderRadius: taruviTokens.radius.lg,        // 8px
           backgroundColor: isLight ? taruviTokens.surface.inputBg : 'rgba(255,255,255,0.04)',
           fontFamily: FONT_BODY,
-          fontSize: taruviTokens.fontSize.formInput,   // 14px
+          fontSize: taruviTokens.fontSize.formInput,   // 16px
           '& .MuiOutlinedInput-notchedOutline': {
             borderColor: isLight ? taruviTokens.surface.borderInput : 'rgba(255,255,255,0.12)',
           },
@@ -788,15 +822,15 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           },
           '&.Mui-focused': { boxShadow: taruviTokens.shadow.focusRing },
           '&.Mui-error .MuiOutlinedInput-notchedOutline': {
-            borderColor: taruviTokens.error[600],
+            borderColor: taruviTokens.error[700],
             borderWidth: 1,
           },
-          // Design spec: disabled = opacity 0.5, no pointer events
+          // Disabled = reduced opacity, no pointer events
           '&.Mui-disabled': {
             opacity: 0.5,
             pointerEvents: 'none',
           },
-          // Design spec: read-only = muted background, no border
+          // Read-only = muted background, no border
           '&.Mui-readOnly': {
             backgroundColor: isLight ? taruviTokens.neutral[100] : 'rgba(255,255,255,0.06)',
             '& .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
@@ -814,7 +848,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         root: {
           borderRadius: taruviTokens.radius.lg,
           backgroundColor: isLight ? taruviTokens.surface.inputBg : 'rgba(255,255,255,0.04)',
-          '&:hover': { backgroundColor: isLight ? '#ECECEF' : 'rgba(255,255,255,0.06)' },
+          '&:hover': { backgroundColor: isLight ? '#eeeeee' : 'rgba(255,255,255,0.06)' },
           '&.Mui-focused': {
             backgroundColor: isLight ? taruviTokens.surface.inputBg : 'rgba(255,255,255,0.04)',
             boxShadow: taruviTokens.shadow.focusRing,
@@ -836,9 +870,9 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           fontFamily: FONT_BODY,
           fontSize: taruviTokens.fontSize.formLabel,    // 13px
           fontWeight: 600,
-          color: isLight ? taruviTokens.text.primary : '#f8fafc',
+          color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
           '&.Mui-focused': { color: accentFg },
-          '&.Mui-error': { color: taruviTokens.error[600] },
+          '&.Mui-error': { color: taruviTokens.error[700] },
         },
       },
     },
@@ -848,7 +882,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           fontFamily: FONT_BODY,
           fontSize: taruviTokens.fontSize.formLabel,
           fontWeight: 600,
-          '& .MuiFormLabel-asterisk': { color: taruviTokens.error[600], marginLeft: 2 },
+          '& .MuiFormLabel-asterisk': { color: taruviTokens.error[700], marginLeft: 2 },
         },
       },
     },
@@ -860,7 +894,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           marginLeft: 4,
           marginTop: 4,
           color: isLight ? taruviTokens.text.muted : taruviTokens.neutral[400],
-          '&.Mui-error': { color: taruviTokens.error[600] },
+          '&.Mui-error': { color: taruviTokens.error[700] },
         },
       },
     },
@@ -879,7 +913,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         root: {
           borderRadius: taruviTokens.radius.xl,        // 12px
           border: `1px solid ${dividerColor}`,
-          backgroundColor: isLight ? taruviTokens.surface.paper : '#11202a',
+          backgroundColor: isLight ? taruviTokens.surface.paper : '#1e1e1e',
           overflowX: 'auto',
         },
       },
@@ -904,7 +938,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           fontSize: taruviTokens.fontSize.tableCell,   // 13px
           padding: taruviTokens.spacing.tableCell,     // 12px 16px
           borderBottom: `1px solid ${isLight ? taruviTokens.surface.borderTableRow : 'rgba(255,255,255,0.06)'}`,
-          color: isLight ? taruviTokens.text.primary : '#f8fafc',
+          color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
           verticalAlign: 'middle',
         },
         head: {
@@ -927,7 +961,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           '&:hover': {
             backgroundColor: isLight ? taruviTokens.primary[50] : 'rgba(30,136,229,0.08)',
           },
-          // Design spec: selected row = primary-50 fill + 2px primary-default left border
+          // Selected row = primary-50 fill + 2px primary-default left border
           '&.Mui-selected': {
             backgroundColor: isLight ? taruviTokens.primary[50] : 'rgba(30,136,229,0.12)',
             boxShadow: `inset 2px 0 0 ${taruviTokens.button.primaryDefault}`,
@@ -941,7 +975,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
     },
 
     // ─ DataGrid (mirrors MuiTable* styling so DataGrid-based list pages
-    //   and hand-rolled <Table> pages look identical — UI_Guidelines §4.7)
+    //   and hand-rolled <Table> pages look identical)
     MuiDataGrid: {
       // v7 takes the header height from the `columnHeaderHeight` **prop**
       // (default 56), not from CSS: `.MuiDataGrid-columnHeaders` carries only
@@ -958,18 +992,19 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       },
       styleOverrides: {
         root: {
-          borderRadius: taruviTokens.radius.xl,                          // 8px (toned)
+          borderRadius: taruviTokens.radius.xl,
           border: `1px solid ${dividerColor}`,
-          backgroundColor: isLight ? taruviTokens.surface.paper : '#11202a',
+          backgroundColor: isLight ? taruviTokens.surface.paper : '#1e1e1e',
           fontFamily: FONT_BODY,
           fontSize: taruviTokens.fontSize.tableCell,                     // 13px
           // The header band's tint belongs on this variable, not on the
           // `columnHeaders` slot. v7 paints every `[role=row]` inside
           // `.MuiDataGrid-container--top` with `--DataGrid-containerBackground`
-          // (default `palette.background.default` = #f3f4f6), and the header row
+          // (default `palette.background.default`), and the header row
           // *is* one of those rows — it is a child of `.MuiDataGrid-columnHeaders`,
-          // so it painted #f3f4f6 straight over any tint set on its parent.
-          // Colouring the variable tints the element that actually ends up on top.
+          // so it painted the default background straight over any tint set
+          // on its parent. Colouring the variable tints the element that
+          // actually ends up on top.
           //
           // Scope-checked in the installed source: this variable is read in
           // exactly one rule (`container--top` / `container--bottom` rows).
@@ -984,12 +1019,12 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           '--DataGrid-containerBackground': isLight
             ? taruviTokens.neutral[50]
             : 'rgba(255,255,255,0.04)',
-          // List pages use `autoHeight` (UI_Guidelines §4.1 — no fixed pixel
-          // height), and `autoHeight` collapses DataGrid overlays to 0px. That
-          // silently hides the loading skeleton and every §4.5 empty state
-          // rendered through `slots.noRowsOverlay` — a real regression, not a
-          // cosmetic one. Reserving the height here rather than per page keeps
-          // three grids from drifting to three different values. Only the
+          // List pages use `autoHeight` (no fixed pixel height), and
+          // `autoHeight` collapses DataGrid overlays to 0px. That silently
+          // hides the loading skeleton and every empty state rendered
+          // through `slots.noRowsOverlay` — a real regression, not a
+          // cosmetic one. Reserving the height here rather than per page
+          // keeps every grid from drifting to a different value. Only the
           // overlay is sized; the grid itself still grows with its rows.
           '--DataGrid-overlayHeight': '320px',
           // Keyboard cell/header navigation must be visible — WCAG 2.4.7. This
@@ -1002,9 +1037,10 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           // heuristic we can't verify here. A stray ring after a mouse click is
           // a cosmetic cost; a missing ring for keyboard users is a blocker.
           //
-          // MUI's own default is a 1px ring at alpha 0.5 (≈1.9:1 on white,
-          // under the 3:1 floor); 2px solid measures 3.51–3.68:1 in light
-          // (paper / header / selected row) and 3.90–4.52:1 in dark.
+          // MUI's own default is a 1px ring at alpha 0.5 (well under the 3:1
+          // floor); 2px solid measures ~3.2–3.7:1 in light (paper / header /
+          // selected row) and ~4.5–5.1:1 in dark — above the 3:1 non-text
+          // floor throughout.
           '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within, & .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within':
             {
               outline: `2px solid ${taruviTokens.button.primaryDefault}`,
@@ -1036,11 +1072,11 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           // and this block's job is `MuiTableCell` parity (16px head and body).
           //
           // No horizontal alignment override: headers inherit v7's left default
-          // and line up with the left-aligned values (UI_Guidelines §4.7). A
-          // previous revision centred the title container here — reverted. Note
-          // if you ever reconsider: `headerAlign` has no default (the string
-          // column type sets `align: 'left'` but leaves `headerAlign` undefined,
-          // and `GridColumnHeaderItem` only adds `columnHeader--alignLeft` when
+          // and line up with the left-aligned values. A previous revision
+          // centred the title container here — reverted. Note if you ever
+          // reconsider: `headerAlign` has no default (the string column type
+          // sets `align: 'left'` but leaves `headerAlign` undefined, and
+          // `GridColumnHeaderItem` only adds `columnHeader--alignLeft` when
           // it is *explicitly* `'left'`), so a rule hung on `--alignLeft`
           // silently matches nothing.
           paddingLeft: 16,
@@ -1075,10 +1111,9 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         //
         // Trade-off: a flex cell no longer applies its own
         // `text-overflow: ellipsis` to a bare string child. Nothing here relies
-        // on that — all 21 data columns across the three lists render through
-        // `renderCell` — but a new column that emits long unwrapped text (or a
-        // bare `valueFormatter` string) must ellipsize in its own element.
-        // See UI_Guidelines §4.7.
+        // on that — all data columns render through `renderCell` — but a new
+        // column that emits long unwrapped text (or a bare `valueFormatter`
+        // string) must ellipsize in its own element.
         cell: {
           display: 'flex',
           alignItems: 'center',
@@ -1089,8 +1124,8 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         // Horizontal alignment is deliberately left to v7's own rules — it
         // already ships `justify-content: flex-start / center / flex-end` on
         // `cell--textLeft / --textCenter / --textRight`, and left is the default.
-        // So list values hug the leading edge (UI_Guidelines §4.7) while the
-        // `alignItems: center` above keeps them centred in the row.
+        // So list values hug the leading edge while the `alignItems: center`
+        // above keeps them centred in the row.
         //
         // There is deliberately no `cell--textLeft` override here. An earlier
         // revision centred it horizontally; that was reverted as a house-style
@@ -1165,10 +1200,10 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           color: isLight ? taruviTokens.text.secondary : taruviTokens.neutral[300],
           transition: taruviTokens.transition.fast,
           '&.Mui-selected': {
-            backgroundColor: taruviTokens.status.inProgress, // #1976d2
+            backgroundColor: taruviTokens.status.inProgress, // blue[700]
             color: '#fff',
             '& .MuiListItemIcon-root': { color: '#fff' },
-            '&:hover': { backgroundColor: '#1565c0' },
+            '&:hover': { backgroundColor: taruviTokens.button.primaryHover },
           },
           '&:hover': {
             backgroundColor: isLight ? taruviTokens.neutral[100] : 'rgba(255,255,255,0.06)',
@@ -1210,7 +1245,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           '&:last-child': {
             fontSize: taruviTokens.fontSize.breadcrumbCurrent, // 16px
             fontWeight: 600,
-            color: isLight ? taruviTokens.text.primary : '#f8fafc',
+            color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
           },
         },
       },
@@ -1221,7 +1256,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       defaultProps: { variant: 'standard' },
       styleOverrides: {
         root: {
-          borderRadius: taruviTokens.radius.lg,         // 10px
+          borderRadius: taruviTokens.radius.lg,         // 8px
           fontFamily: FONT_BODY,
           fontSize: taruviTokens.fontSize.p2,          // 14px
           padding: taruviTokens.spacing.statusMsg,     // 14px 18px
@@ -1232,31 +1267,32 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
         message: { padding: 0 },
         standardSuccess: {
           backgroundColor: taruviTokens.success[50],
-          // `completeChip` over `complete`: the alert icon is a meaningful
-          // graphic (WCAG 1.4.11 → 3:1) and #388e3c on this tint is only
-          // 3.64:1; #2e7d32 gives 4.53:1.
+          // `completeChip`, not `complete`: the alert icon is a meaningful
+          // graphic (WCAG 1.4.11 → 3:1) and green[700] on this tint is only
+          // ~3.7:1; green[800] gives ~4.6:1.
           borderLeftColor: taruviTokens.status.completeChip,
-          color: isLight ? taruviTokens.text.primary : '#f8fafc',
+          color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
           '& .MuiAlert-icon': { color: taruviTokens.status.completeChip },
         },
         standardError: {
           backgroundColor: taruviTokens.error[50],
-          borderLeftColor: taruviTokens.error[600],
-          color: isLight ? taruviTokens.text.primary : '#f8fafc',
-          '& .MuiAlert-icon': { color: taruviTokens.error[600] },
+          borderLeftColor: taruviTokens.error[700],
+          color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
+          '& .MuiAlert-icon': { color: taruviTokens.error[700] },
         },
         standardInfo: {
           backgroundColor: taruviTokens.primary[100],
           borderLeftColor: taruviTokens.status.inProgress,
-          color: isLight ? taruviTokens.text.primary : '#f8fafc',
+          color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
           '& .MuiAlert-icon': { color: taruviTokens.status.inProgress },
         },
         standardWarning: {
           backgroundColor: taruviTokens.warning[50],
-          // `warning[500]` #f57c00 on this tint is 2.55:1 — under the 3:1 floor
-          // for the icon (1.4.11). `warning[800]` gives 5.27:1.
+          // `warning[500]` (orange[500]) on this tint is under the 3:1 floor
+          // for the icon (1.4.11); `warning[800]` (`deepOrange[900]`) gives
+          // ~5.1:1.
           borderLeftColor: taruviTokens.warning[800],
-          color: isLight ? taruviTokens.text.primary : '#f8fafc',
+          color: isLight ? taruviTokens.text.primary : 'rgba(255,255,255,0.87)',
           '& .MuiAlert-icon': { color: taruviTokens.warning[800] },
         },
       },
@@ -1275,7 +1311,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
           color: '#fff',
           fontFamily: FONT_BODY,
           fontSize: '0.75rem',
-          borderRadius: taruviTokens.radius.sm,        // 6px
+          borderRadius: taruviTokens.radius.sm,        // 2px
           padding: '6px 10px',
         },
         arrow: { color: taruviTokens.neutral[900] },
@@ -1294,11 +1330,10 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       defaultProps: { underline: 'hover' },
       styleOverrides: {
         root: {
-          // Was pinned to #1976d2 in both modes: 3.61:1 on the dark card
-          // (#11202a) — a text failure everywhere links appear in dark mode —
-          // and only 4.18:1 on the light page background / 4.39:1 on a hovered
-          // row. Now mode-aware via `accentFg`: 5.22–5.75:1 light, 10.85–13.27:1
-          // dark, on every surface links actually land on in this app.
+          // Mode-aware via `accentFg`: ≥6:1 in light, ≥7.5:1 in dark, on
+          // every surface links land on in this theme. A single hex pinned
+          // across both modes would fail one of them — a mid-ramp blue that
+          // passes on a light card typically drops under 4.5:1 on a dark one.
           color: accentFg,
           fontWeight: 500,
           fontFamily: FONT_BODY,
@@ -1319,7 +1354,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       },
     },
 
-    // ─ Accordion (collapsible form section — UI_Guidelines §4.3)
+    // ─ Accordion (collapsible form section)
     // Flat by default: no shadow, no top divider line, no extra margin
     // when expanded. Pair with `<ExpandMoreRoundedIcon />`.
     MuiAccordion: {
@@ -1383,7 +1418,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
     MuiDialogContent: {
       styleOverrides: { root: { padding: 0 } },
     },
-    // Confirmation-dialog body (UI_Guidelines §4.8) — body2 size, secondary color
+    // Confirmation-dialog body — body2 size, secondary color
     MuiDialogContentText: {
       styleOverrides: {
         root: {
@@ -1470,7 +1505,7 @@ const componentOverrides = (mode: 'light' | 'dark'): ThemeOptions['components'] 
       defaultProps: { color: 'primary' },
     },
 
-    // ─ Skeleton loader (UI_Guidelines §4.10)
+    // ─ Skeleton loader
     MuiSkeleton: {
       defaultProps: { animation: 'wave' },
       styleOverrides: {
@@ -1493,45 +1528,53 @@ export const lightThemeOptions: ThemeOptions = {
   palette: {
     mode: 'light',
     primary: {
-      // `primaryFill` (#1976d2), not `primaryDefault` (#1E88E5): `primary.main`
-      // is what MUI pairs with `contrastText` for every `color="primary"`
-      // surface it derives itself — filled/outlined primary chips (the
-      // active-filter chip row on every list page) and the bulk-selection
-      // toolbar among them. White on #1E88E5 is 3.68:1; on #1976d2 it is
-      // 4.60:1, and #1976d2 as a label on paper is likewise 4.60:1.
-      main: taruviTokens.button.primaryFill,     // #1976d2
-      light: taruviTokens.primary[300],
-      dark: taruviTokens.button.primaryActive,
+      // `primaryFill` (blue[700]), not `primaryDefault` (blue[600]):
+      // `primary.main` is what MUI pairs with `contrastText` for every
+      // `color="primary"` surface it derives itself — filled/outlined
+      // primary chips (the active-filter chip row on every list page) and
+      // the bulk-selection toolbar among them. White on blue[600] is
+      // ~3.7:1; on blue[700] it is ~4.6:1.
+      main: taruviTokens.button.primaryFill,     // blue[700]
+      light: taruviTokens.primary[400],
+      dark: taruviTokens.button.primaryHover,    // blue[800]
       contrastText: '#ffffff',
     },
     secondary: {
-      main: taruviTokens.secondary[700],         // #004369
+      main: taruviTokens.secondary[700],         // purple[700]
       light: taruviTokens.secondary[300],
       dark: taruviTokens.secondary[900],
       contrastText: '#ffffff',
     },
     error: {
-      main: taruviTokens.error[600],             // #c2185b
-      light: taruviTokens.error[200],
+      // `error[700]`, not `error[500]` (MUI's own literal default `error.main`):
+      // white on `error[500]` is only ~3.7:1. `error[700]` clears ~5.0:1.
+      main: taruviTokens.error[700],
+      light: taruviTokens.error[300],
       dark: taruviTokens.error[800],
       contrastText: '#ffffff',
     },
     warning: {
-      main: taruviTokens.warning[500],           // #f57c00
+      // `warning[800]` (`deepOrange[900]`), not a mid-ramp orange: white
+      // text on any true "orange" shade light enough to still read as
+      // orange lands well under 4.5:1 — this is the one role in the
+      // palette where MUI's own literal default (`#ed6c02`, ~3.1:1) also
+      // falls short, so this theme picks a shade that actually passes
+      // rather than reproducing that gap.
+      main: taruviTokens.warning[800],
       light: taruviTokens.warning[200],
-      dark: taruviTokens.warning[700],
+      dark: '#8a2409',
       contrastText: '#ffffff',
     },
     info: {
-      main: taruviTokens.status.inProgress,      // #1976d2
+      main: taruviTokens.status.inProgress,      // blue[700] — aliases primary; ~4.6:1
       light: taruviTokens.primary[300],
-      dark: taruviTokens.secondary[700],
+      dark: taruviTokens.button.primaryHover,
       contrastText: '#ffffff',
     },
     success: {
-      main: taruviTokens.success[500],           // #10B981
-      light: taruviTokens.success[200],
-      dark: taruviTokens.success[700],
+      main: taruviTokens.success[800],           // green[800] — white text ~5.1:1
+      light: taruviTokens.success[300],
+      dark: taruviTokens.success[900],
       contrastText: '#ffffff',
     },
     grey: {
@@ -1547,12 +1590,12 @@ export const lightThemeOptions: ThemeOptions = {
       900: taruviTokens.neutral[900],
     },
     background: {
-      default: taruviTokens.surface.bg,          // #f3f4f6
-      paper: taruviTokens.surface.paper,         // #ffffff
+      default: taruviTokens.surface.bg,          // grey[100]
+      paper: taruviTokens.surface.paper,         // white
     },
     text: {
-      primary: taruviTokens.text.primary,        // #121414
-      secondary: taruviTokens.text.secondary,    // #596365
+      primary: taruviTokens.text.primary,        // rgba(0,0,0,0.87) — MUI's own default
+      secondary: taruviTokens.text.secondary,    // rgba(0,0,0,0.6) — MUI's own default
       disabled: taruviTokens.neutral[400],
     },
     divider: taruviTokens.surface.borderLight,
@@ -1577,7 +1620,7 @@ export const darkThemeOptions: ThemeOptions = {
       main: taruviTokens.secondary[300],
       light: taruviTokens.secondary[100],
       dark: taruviTokens.secondary[600],
-      contrastText: taruviTokens.secondary[900],
+      contrastText: '#000000',
     },
     error: {
       main: taruviTokens.error[300],
@@ -1586,7 +1629,7 @@ export const darkThemeOptions: ThemeOptions = {
       contrastText: '#000000',
     },
     warning: {
-      main: taruviTokens.warning[400],
+      main: taruviTokens.warning[300],
       light: taruviTokens.warning[200],
       dark: taruviTokens.warning[600],
       contrastText: '#000000',
@@ -1616,11 +1659,11 @@ export const darkThemeOptions: ThemeOptions = {
       900: taruviTokens.neutral[900],
     },
     background: {
-      default: '#0b1518',
-      paper: '#11202a',
+      default: taruviTokens.neutral.darkest,     // #121212 — MUI's own actual dark-mode default
+      paper: '#1e1e1e',                          // conventional Material dark-surface elevation tone
     },
     text: {
-      primary: '#f8fafc',
+      primary: 'rgba(255,255,255,0.87)',         // MUI's own default dark-mode text.primary
       secondary: taruviTokens.neutral[300],
       disabled: taruviTokens.neutral[500],
     },
