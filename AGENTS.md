@@ -80,22 +80,24 @@ options, hook return shapes, and production UX patterns. Don't duplicate that he
 
 For anything that renders or styles UI:
 
-1. **Check for a local `DESIGN.md` first** (a client-specific reskin, at this
-   repo's root). If one exists, read it instead — it defines this app's actual
-   token values, and takes priority over the shared default. Otherwise,
-   `WebFetch` the shared Taruvi defaults — not vendored into this repo, kept
-   separate so every fork/app reads the same current version instead of a copy
-   that drifts. Fetch fresh each time, don't rely on a memory of a prior fetch:
-   - Tokens + visual rationale: `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/DESIGN.md`
-   - Behavioral standards, page patterns: `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/UX.md`
+1. **Check for a local `DESIGN.md` first** (this app's own brand, at this
+   repo's root). If one exists, read it — it defines this app's actual token
+   values. **This template ships brand-neutral by default — there is no
+   Taruvi-brand fallback.** If no local `DESIGN.md` exists, skip it entirely;
+   don't fetch Taruvi's own design system. Style from whatever's already in
+   [`themeOptions.ts`](themeOptions.ts) (plain MUI defaults out of the box)
+   until this app defines its own `DESIGN.md`.
 
-   `UX.md` is always fetched from the shared repo regardless of the check
-   above — it's behavioral, not brand-specific, so there's no local-override
-   case for it.
+   `UX.md` (behavioral standards, page patterns — not brand-specific) is
+   always fetched fresh regardless of the check above, since it's generic
+   enterprise-app guidance, not a Taruvi visual identity:
+   `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/UX.md`
 
    For component/prop-level guidance or MUI DataGrid v7 specifics, fetch
    `taruvi-ui/components.md` / `taruvi-ui/datagrid.md` from the same repo, only
-   when the task actually touches that:
+   when the task actually touches that and a local `DESIGN.md` exists to apply
+   them against — `components.md` assumes Taruvi's own chip/component
+   conventions, so it isn't useful before this app has adopted a brand:
    `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/taruvi-ui/components.md`
    `https://raw.githubusercontent.com/Taruvi-ai/ui-guidelines/main/taruvi-ui/datagrid.md`
 2. Import design tokens from [`themeOptions.ts`](themeOptions.ts)
