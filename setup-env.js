@@ -1,8 +1,12 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+import fs from 'fs';
+import path from 'path';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create readline interface for user input
 const rl = readline.createInterface({
@@ -89,13 +93,10 @@ async function main() {
     // Ask for environment variables
     const baseUrl = await askQuestion(
       'Taruvi Base URL',
-      'https://appbuild.taruvi.cloud'
+      'https://tenant.taruvi.cloud'
     );
 
-    const apiKey = await askQuestion(
-      'API Key',
-      '14de44e0e32ebcea2e94771145654b7d6b445a4756f59d7058e90ffddd651968'
-    );
+    const apiKey = await askQuestion('API Key');
 
     const appSlug = await askQuestion(
       'Application Slug',

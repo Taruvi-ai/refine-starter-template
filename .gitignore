@@ -47,3 +47,6 @@ skills-lock.json
 # Auth secrets
 auth.json
 .codex/auth.json
+
+# Local Kiro/MCP config — holds real credentials once "setup taruvi" runs
+.kiro/settings/mcp.json
