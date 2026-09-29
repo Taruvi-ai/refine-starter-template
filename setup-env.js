@@ -99,7 +99,7 @@ async function main() {
     // Ask for environment variables
     const baseUrl = await askQuestion(
       'Taruvi Base URL',
-      'https://tenant.taruvi.cloud'
+      'https://tenant.taruvibase.cloud'
     );
 
     const apiKey = await askQuestion('API Key');

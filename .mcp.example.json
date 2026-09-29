@@ -2,7 +2,7 @@
   "mcpServers": {
     "taruvi": {
         "type": "http",
-        "url": "https://tenant.taruvi.cloud/mcp/",
+        "url": "https://tenant.taruvibase.cloud/mcp/",
         "headers":{
           "Authorization": "Api-Key YOUR_TARUVI_API_KEY",
           "X-App-Slug": "sample-app"

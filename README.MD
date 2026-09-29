@@ -28,7 +28,7 @@ set them by hand, copy `.env.example` → `.env` and `.mcp.example.json` →
 `.mcp.json`, then fill in:
 
 ```env
-TARUVI_SITE_URL=https://<tenant>.taruvi.cloud
+TARUVI_SITE_URL=https://<tenant>.taruvibase.cloud
 TARUVI_API_KEY=<your-api-key>
 TARUVI_APP_SLUG=<your-app-slug>
 ```

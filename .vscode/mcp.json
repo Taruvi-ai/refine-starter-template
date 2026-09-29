@@ -3,7 +3,7 @@
     {
       "id": "taruvi-site-url",
       "type": "promptString",
-      "description": "Taruvi site URL (e.g. https://tenant.taruvi.cloud)",
+      "description": "Taruvi site URL (e.g. https://tenant.taruvibase.cloud)",
       "default": "${env:TARUVI_SITE_URL}"
     },
     {

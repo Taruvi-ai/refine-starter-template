@@ -159,7 +159,7 @@ name and `list/create/edit/show` routes + `meta`.
 
 **Environment (`.env`):**
 ```env
-TARUVI_SITE_URL=https://<tenant>.taruvi.cloud
+TARUVI_SITE_URL=https://<tenant>.taruvibase.cloud
 TARUVI_API_KEY=<key>
 TARUVI_APP_SLUG=<app-slug>
 ```
