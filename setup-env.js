@@ -66,7 +66,13 @@ function updateMcpFile(envValues) {
 
   let mcpContent = fs.readFileSync(mcpExamplePath, 'utf8');
 
-  // Replace API key and app slug in taruvi section
+  // Replace base URL, API key, and app slug in taruvi section
+  const normalizedBaseUrl = envValues.baseUrl.replace(/\/+$/, '');
+  mcpContent = mcpContent.replace(
+    /"url": "[^"]*"/,
+    `"url": "${normalizedBaseUrl}/mcp/"`
+  );
+
   mcpContent = mcpContent.replace(
     /"Authorization": "Api-Key [^"]*"/,
     `"Authorization": "Api-Key ${envValues.apiKey}"`
