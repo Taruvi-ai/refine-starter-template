@@ -61,6 +61,10 @@ npm run deploy    # build + upload dist/ to Taruvi frontend workers
 
 [Refine](https://refine.dev) · React + TypeScript · MUI · Taruvi providers + MCP
 
+## UTM Tracking
+
+https://taruvibase.com/?utm_source=github&utm_medium=readme&utm_campaign=refine-starter-template
+
 ## License
 
 MIT
